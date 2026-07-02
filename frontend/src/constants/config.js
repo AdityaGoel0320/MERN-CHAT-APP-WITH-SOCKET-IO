@@ -1,1 +1,1 @@
-export const server = "https://chat-buddy-with-socket-io.onrender.com"
+export const server = "http://localhost:8000"

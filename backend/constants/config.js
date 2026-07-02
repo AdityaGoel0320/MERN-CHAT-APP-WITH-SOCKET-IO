@@ -1,10 +1,11 @@
 const corsOptions = {
   origin: [
-    process.env.CLIENT_URL,
+    "http://localhost:5174"
   ],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 };
+
 
 const CHATTU_TOKEN = "chattu-token";
 

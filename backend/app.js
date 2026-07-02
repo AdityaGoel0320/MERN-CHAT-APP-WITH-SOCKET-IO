@@ -143,8 +143,8 @@ io.on("connection", (socket) => {
 
 app.use(errorMiddleware);
 
-server.listen(port, () => {
-  console.log(`Server is running on port ${port} in ${envMode} Mode`);
+server.listen(8000, () => {
+  console.log(`Server is running on port 8000 in ${envMode} Mode`);
 });
 
 export { envMode, adminSecretKey, userSocketIDs };

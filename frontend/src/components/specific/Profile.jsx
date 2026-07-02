@@ -1,63 +1,84 @@
 import React from "react";
-import { Avatar, Stack, Typography } from "@mui/material";
-import {
-  Face as FaceIcon,
-  AlternateEmail as UserNameIcon,
-  CalendarMonth as CalendarIcon,
-} from "@mui/icons-material";
+import { useSelector } from "react-redux";
 import moment from "moment";
 import { transformImage } from "../../lib/features";
-import { useDispatch, useSelector } from "react-redux";
-
 
 const Profile = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <Stack spacing={"2rem"} direction={"column"} alignItems={"center"}>
-      <Avatar
-        src={transformImage(user?.avatar?.url)}
-        sx={{
-          width: 200,
-          height: 200,
-          objectFit: "contain",
-          marginBottom: "1rem",
-          border: "5px solid white",
-        }}
-      />
-      <ProfileCard heading={"Bio"} text={user?.bio} />
-      <ProfileCard
-        heading={"Username"}
-        text={user?.username}
-        Icon={<UserNameIcon />}
-      />
-      <ProfileCard heading={"Name"} text={user?.name} Icon={<FaceIcon />} />
-      <ProfileCard
-        heading={"Joined"}
-        text={moment(user?.createdAt).fromNow()}
-        Icon={<CalendarIcon />}
-      />
-    </Stack>
+    <div 
+      className="w-full max-w-md mx-auto flex flex-col items-center p-6 sm:p-8 rounded-[2.5rem] bg-white/60 border border-white/50 backdrop-blur-2xl shadow-[0_20px_50px_rgba(79,70,229,0.06)] overflow-y-auto"
+      style={{
+        msOverflowStyle: "none",
+        scrollbarWidth: "none"
+      }}
+    >
+      {/* Hide scrollbar handle visibility natively inside sub-layouts */}
+      <style>{`
+        div::-webkit-scrollbar {
+          display: none !important;
+        }
+      `}</style>
+
+      {/* --- PROFILE AVATAR CANVAS WITH PASTEL BORDER --- */}
+      <div className="relative mb-6 group">
+        <div className="absolute inset-0 rounded-full bg-indigo-500/10 blur-xl group-hover:scale-110 transition-transform duration-300" />
+        <img
+          src={transformImage(user?.avatar?.url)}
+          alt={user?.name || "User Avatar"}
+          className="relative w-44 h-44 rounded-full object-cover border-[6px] border-white bg-slate-50 shadow-md transform transition-transform duration-300 group-hover:scale-[1.02]"
+        />
+      </div>
+
+      {/* --- PROFILE METRICS STACK --- */}
+      <div className="w-full space-y-3.5">
+        <ProfileCard 
+          heading="Bio" 
+          text={user?.bio || "No bio added yet."} 
+          iconClass="fas fa-quote-left" 
+        />
+        
+        <ProfileCard
+          heading="Username"
+          text={`@${user?.username}`}
+          iconClass="fas fa-at"
+        />
+        
+        <ProfileCard 
+          heading="Name" 
+          text={user?.name} 
+          iconClass="fas fa-user-shield" 
+        />
+        
+        <ProfileCard
+          heading="Joined Network"
+          text={user?.createdAt ? moment(user.createdAt).fromNow() : "N/A"}
+          iconClass="fas fa-calendar-alt"
+        />
+      </div>
+    </div>
   );
 };
 
-const ProfileCard = ({ text, Icon, heading }) => (
-  <Stack
-    direction={"row"}
-    alignItems={"center"}
-    spacing={"1rem"}
-    color={"white"}
-    textAlign={"center"}
-  >
-    {Icon && Icon}
+/* --- INNER SUB-COMPONENT CARD LAYOUT --- */
+const ProfileCard = ({ text, iconClass, heading }) => (
+  <div className="w-full flex items-center gap-4 px-5 py-3.5 rounded-2xl bg-white/50 border border-white/40 hover:bg-white/80 transition-all duration-150 group shadow-sm">
+    {/* Icon Wrapper Frame */}
+    <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-600/10 border border-indigo-500/10 text-indigo-600 transition-colors duration-200 group-hover:bg-indigo-600 group-hover:text-white text-sm shrink-0">
+      <i className={iconClass} />
+    </div>
 
-    <Stack>
-      <Typography variant="body1">{text}</Typography>
-      <Typography color={"gray"} variant="caption">
+    {/* Text Context Area */}
+    <div className="flex flex-col text-left overflow-hidden">
+      <span className="text-sm font-semibold text-slate-800 tracking-wide truncate">
+        {text}
+      </span>
+      <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-0.5">
         {heading}
-      </Typography>
-    </Stack>
-  </Stack>
+      </span>
+    </div>
+  </div>
 );
 
 export default Profile;

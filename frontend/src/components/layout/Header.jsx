@@ -2,7 +2,6 @@ import {
   AppBar,
   Backdrop,
   Badge,
-  Box,
   IconButton,
   Toolbar,
   Tooltip,
@@ -75,38 +74,24 @@ const Header = () => {
 
   return (
     <>
-      <Box sx={{ flexGrow: 1 }} height={"4rem"}>
+      <div >
         <AppBar
-          position="static"
-          sx={{
-            bgcolor: orange,
-          }}
+ 
         >
           <Toolbar>
-            <Typography
-              variant="h6"
-              sx={{
-                display: { xs: "none", sm: "block" },
-              }}
-            >
               {AppName}
-            </Typography>
 
-            <Box
-              sx={{
-                display: { xs: "block", sm: "none" },
-              }}
+            <div
+     
             >
               <IconButton color="inherit" onClick={handleMobile}>
                 <MenuIcon />
               </IconButton>
-            </Box>
-            <Box
-              sx={{
-                flexGrow: 1,
-              }}
+            </div>
+            <div
+           
             />
-            <Box>
+            <div>
               <IconBtn
                 title={"Search"}
                 icon={<SearchIcon />}
@@ -137,10 +122,10 @@ const Header = () => {
                 icon={<LogoutIcon />}
                 onClick={logoutHandler}
               />
-            </Box>
+            </div>
           </Toolbar>
         </AppBar>
-      </Box>
+      </div>
 
       {isSearch && (
         <Suspense fallback={<Backdrop open />}>
@@ -155,7 +140,7 @@ const Header = () => {
       )}
 
       {isNewGroup && (
-        <Suspense fallback={<Backdrop open />}>
+        <Suspense className ="bg-red-500" fallback={<Backdrop open />}>
           <NewGroupDialog />
         </Suspense>
       )}

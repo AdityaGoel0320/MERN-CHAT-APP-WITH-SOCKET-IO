@@ -83,7 +83,7 @@ const UserProfile = () => {
         </NavLink>
       </div>
       <div className='flex justify-center items-center h-[80vh]'>
-        <div className=" p-6 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg shadow-[rgba(0,_0,_0,_0.4)_0px_30px_90px]  hover:shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] animate-fade-in">
+        <div className=" p-6">
           <div className="flex items-center justify-center">
             <img
               src={transformImage(user.avatar?.url)}

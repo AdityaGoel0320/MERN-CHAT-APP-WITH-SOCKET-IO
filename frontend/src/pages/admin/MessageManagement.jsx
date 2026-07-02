@@ -8,6 +8,7 @@ import Table from "../../components/shared/Table";
 import { server } from "../../constants/config";
 import { useErrors } from "../../hooks/hook";
 import { fileFormat, transformImage } from "../../lib/features";
+import ChatSkeleton from "../../components/shared/ChatSkeleton";
 
 const columns = [
   {
@@ -120,7 +121,7 @@ const MessageManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <Skeleton height={"100vh"} />
+        <ChatSkeleton/>
       ) : (
         <Table
           heading={"All Messages"}

@@ -5,17 +5,23 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { useInfiniteScrollTop } from "6pp";
+import { FiPaperclip } from "react-icons/fi";
+import { IoSend } from "react-icons/io5";
+
 import AppLayout from "../components/layout/AppLayout";
-import { IconButton, Skeleton, Stack } from "@mui/material";
-import { grayColor, orange } from "../constants/color";
-import {
-  AttachFile as AttachFileIcon,
-  Send as SendIcon,
-} from "@mui/icons-material";
-import { InputBox } from "../components/styles/StyledComponents";
 import FileMenu from "../components/dialogs/FileMenu";
 import MessageComponent from "../components/shared/MessageComponent";
+import ChatSkeleton from "../components/shared/ChatSkeleton";
+import { TypingLoader } from "../components/layout/Loaders";
+
 import { getSocket } from "../socket";
+import { useErrors, useSocketEvents } from "../hooks/hook";
+import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
+import { setIsFileMenu } from "../redux/reducers/misc";
+import { removeNewMessagesAlert } from "../redux/reducers/chat";
 import {
   ALERT,
   CHAT_JOINED,
@@ -24,14 +30,6 @@ import {
   START_TYPING,
   STOP_TYPING,
 } from "../constants/events";
-import { useChatDetailsQuery, useGetMessagesQuery } from "../redux/api/api";
-import { useErrors, useSocketEvents } from "../hooks/hook";
-import { useInfiniteScrollTop } from "6pp";
-import { useDispatch } from "react-redux";
-import { setIsFileMenu } from "../redux/reducers/misc";
-import { removeNewMessagesAlert } from "../redux/reducers/chat";
-import { TypingLoader } from "../components/layout/Loaders";
-import { useNavigate } from "react-router-dom";
 
 const Chat = ({ chatId, user }) => {
   const socket = getSocket();
@@ -51,7 +49,6 @@ const Chat = ({ chatId, user }) => {
   const typingTimeout = useRef(null);
 
   const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
-
   const oldMessagesChunk = useGetMessagesQuery({ chatId, page });
 
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
@@ -82,7 +79,7 @@ const Chat = ({ chatId, user }) => {
     typingTimeout.current = setTimeout(() => {
       socket.emit(STOP_TYPING, { members, chatId });
       setIamTyping(false);
-    }, [2000]);
+    }, 2000);
   };
 
   const handleFileOpen = (e) => {
@@ -92,10 +89,8 @@ const Chat = ({ chatId, user }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-
     if (!message.trim()) return;
 
-    // Emitting the message to the server
     socket.emit(NEW_MESSAGE, { chatId, members, message });
     setMessage("");
   };
@@ -125,7 +120,6 @@ const Chat = ({ chatId, user }) => {
   const newMessagesListener = useCallback(
     (data) => {
       if (data.chatId !== chatId) return;
-
       setMessages((prev) => [...prev, data.message]);
     },
     [chatId]
@@ -134,7 +128,6 @@ const Chat = ({ chatId, user }) => {
   const startTypingListener = useCallback(
     (data) => {
       if (data.chatId !== chatId) return;
-
       setUserTyping(true);
     },
     [chatId]
@@ -154,7 +147,7 @@ const Chat = ({ chatId, user }) => {
       const messageForAlert = {
         content: data.message,
         sender: {
-          _id: "djasdhajksdhasdsadasdas",
+          _id: "admin-alert-node-id-00x",
           name: "Admin",
         },
         chat: chatId,
@@ -174,96 +167,77 @@ const Chat = ({ chatId, user }) => {
   };
 
   useSocketEvents(socket, eventHandler);
-
   useErrors(errors);
 
   const allMessages = [...oldMessages, ...messages];
 
   return chatDetails.isLoading ? (
-    <Skeleton />
+    <ChatSkeleton />
   ) : (
-    <Fragment>
-      <Stack
-      ref={containerRef}
-      boxSizing={"border-box"}
-      padding={"1rem"}
-      spacing={"1rem"}
-      bgcolor={grayColor} // Remove this line if you're not using grayColor
-      height={"90%"}
-      sx={{
-        overflowX: "hidden",
-        overflowY: "auto",
-        backgroundImage: `url('../Images/bg.png')`, // Adjust the path to your image
-        backgroundSize: 'cover', // Optional: Adjust to your preference
-        backgroundRepeat: 'no-repeat', // Optional: Adjust to your preference
-      }}
-      className=" shadow-[inset_-12px_-8px_40px_#46464620]"
+    <div className="flex flex-col h-[88vh] w-full relative overflow-hidden select-none px-2 sm:px-4">
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none !important; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
 
+      {/* --- ADDED 'flex flex-col' HERE TO ALLOW LEFT/RIGHT ALIGNMENT --- */}
+      <div
+        ref={containerRef}
+        className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto no-scrollbar w-full max-w-5xl mx-auto rounded-t-[2rem] bg-white/30 backdrop-blur-md border-x border-t border-white/40 shadow-inner"
       >
         {allMessages.map((i) => (
           <MessageComponent key={i._id} message={i} user={user} />
         ))}
 
-        {userTyping && <TypingLoader />}
+        {/* Constrained typing loader to stay on the left */}
+        {userTyping && (
+          <div className="flex items-center gap-2 p-2 max-w-fit rounded-2xl bg-white/60 border border-white text-indigo-600 shadow-sm animate-pulse self-start">
+            <TypingLoader />
+          </div>
+        )}
 
         <div ref={bottomRef} />
-      </Stack>
+      </div>
 
+      {/* --- MODERN FLOATING GLASS INPUT BOX --- */}
       <form
-        style={{
-          height: "10%",
-        }}
         onSubmit={submitHandler}
-        className="font-bold shadow-[0_20px_50px_rgba(8,_112,_184,_0.7)] border-2 border-black  mr-2 ml-2  rounded-lg "
-
-        
+        className="h-20 w-full max-w-5xl mx-auto pb-4 pt-2 z-10"
       >
-        <Stack
-          direction={"row"}
-          height={"100%"}
-          padding={"1rem"}
-          alignItems={"center"}
-          position={"relative"}
+        <div className="w-full h-full flex items-center px-4 gap-3 rounded-2xl bg-white/70 border border-white/80 backdrop-blur-xl shadow-[0_10px_30px_rgba(79,70,229,0.04)]">
           
-        >
-          <IconButton
-            sx={{
-              position: "absolute",
-              left: "0.1rem",
-              rotate: "30deg",
-            }}
+          {/* File Attachment Point */}
+          <button
+            type="button"
             onClick={handleFileOpen}
+            className="flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100/80 hover:bg-indigo-50 border border-slate-200/40 text-slate-500 hover:text-indigo-600 active:scale-95 transition-all shrink-0"
           >
-            <AttachFileIcon />
-          </IconButton>
+            <FiPaperclip className="text-lg" />
+          </button>
 
-          <InputBox
-            placeholder="Type Message Here..."
+          {/* Secure Messaging Input Field */}
+          <input
+            type="text"
+            placeholder="Write your message..."
             value={message}
             onChange={messageOnChange}
-            className="flex justify-center items-center font-bold border-4 border-black  bg-black   "
+            className="flex-1 h-11 px-4 rounded-xl bg-white/90 border border-slate-200/60 text-slate-800 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-none"
           />
 
-          <IconButton
+          {/* Send Trigger Button */}
+          <button
             type="submit"
-            sx={{
-              rotate: "-30deg",
-              bgcolor: "black",
-              color: "white",
-              marginLeft: "1rem",
-              padding: "0.5rem",
-              "&:hover": {
-                bgcolor: "error.dark",
-              },
-            }}
+            disabled={!message.trim()}
+            className="flex items-center justify-center h-11 px-5 rounded-xl bg-indigo-600 disabled:bg-indigo-300 text-white font-black hover:bg-indigo-500 active:scale-95 shadow-md hover:shadow-indigo-500/10 transition-all shrink-0 gap-2 text-xs uppercase tracking-wider"
           >
-            <SendIcon />
-          </IconButton>
-        </Stack>
+            <span>Send</span>
+            <IoSend className="text-xs transform rotate-[-15deg]" />
+          </button>
+        </div>
       </form>
 
       <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
-    </Fragment>
+    </div>
   );
 };
 

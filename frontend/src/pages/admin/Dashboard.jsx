@@ -25,6 +25,7 @@ import {
 import { matBlack } from "../../constants/color";
 import { server } from "../../constants/config";
 import { useErrors } from "../../hooks/hook";
+import ChatSkeleton from "../../components/shared/ChatSkeleton";
 
 const Dashboard = () => {
   const { loading, data, error } = useFetchData(
@@ -97,7 +98,7 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <Skeleton height={"100vh"} />
+        <ChatSkeleton/>
       ) : (
         <Container component={"main"}>
           {Appbar}

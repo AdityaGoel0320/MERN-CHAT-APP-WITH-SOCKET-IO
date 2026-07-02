@@ -16,6 +16,7 @@ import {
 import { useAsyncMutation, useErrors } from "../../hooks/hook";
 import { useDispatch, useSelector } from "react-redux";
 import { setIsAddMember } from "../../redux/reducers/misc";
+import ChatSkeleton from "../shared/ChatSkeleton";
 const AddMemberDialog = ({ chatId }) => {
   const dispatch = useDispatch();
 
@@ -53,7 +54,7 @@ const AddMemberDialog = ({ chatId }) => {
 
         <Stack spacing={"1rem"}>
           {isLoading ? (
-            <Skeleton />
+            <ChatSkeleton/>
           ) : data?.friends?.length > 0 ? (
             data?.friends?.map((i) => (
               <UserItem

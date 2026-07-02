@@ -1,32 +1,23 @@
-import { Drawer, Grid, Skeleton } from "@mui/material";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import Navbar2 from "./Navbar2";
-import Header from "./Header";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import Navbar2 from "./Navbar2";
+import DeleteChatMenu from "../dialogs/DeleteChatMenu";
+import Title from "../shared/Title";
+import ChatList from "../specific/ChatList";
+import ChatSkeleton from "../shared/ChatSkeleton";
+import { useErrors, useSocketEvents } from "../../hooks/hook";
+import { getOrSaveFromStorage } from "../../lib/features";
+import { useMyChatsQuery } from "../../redux/api/api";
+import { incrementNotification, setNewMessagesAlert } from "../../redux/reducers/chat";
+import { setIsDeleteMenu, setIsMobile, setSelectedDeleteChat } from "../../redux/reducers/misc";
+import { getSocket } from "../../socket";
 import {
   NEW_MESSAGE_ALERT,
   NEW_REQUEST,
   ONLINE_USERS,
   REFETCH_CHATS,
 } from "../../constants/events";
-import { useErrors, useSocketEvents } from "../../hooks/hook";
-import { getOrSaveFromStorage } from "../../lib/features";
-import { useMyChatsQuery } from "../../redux/api/api";
-import {
-  incrementNotification,
-  setNewMessagesAlert,
-} from "../../redux/reducers/chat";
-import {
-  setIsDeleteMenu,
-  setIsMobile,
-  setSelectedDeleteChat,
-} from "../../redux/reducers/misc";
-import { getSocket } from "../../socket";
-import DeleteChatMenu from "../dialogs/DeleteChatMenu";
-import Title from "../shared/Title";
-import ChatList from "../specific/ChatList";
-import Profile from "../specific/Profile";
 
 const AppLayout = () => (WrappedComponent) => {
   return (props) => {
@@ -91,77 +82,78 @@ const AppLayout = () => (WrappedComponent) => {
     useSocketEvents(socket, eventHandlers);
 
     return (
-      <>
-        <Title />
-        {/* <Header /> */}
+      <div className="h-screen w-screen bg-gradient-to-tr from-violet-50 via-indigo-50/20 to-emerald-50 text-slate-700 flex flex-col overflow-hidden select-none relative">
+        <style>{`
+          .no-scrollbar::-webkit-scrollbar { display: none !important; }
+          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        `}</style>
 
-        {/* <Header /> */}
+        {/* Dynamic Page Metadata */}
+        <Title />
+
+        {/* Premium Core Glass Navigation */}
         <Navbar2 />
 
+        {/* Context Menu Dialog Portal */}
+        <DeleteChatMenu dispatch={dispatch} deleteMenuAnchor={deleteMenuAnchor} />
 
-
-
-        {/* <Navbar2/> */}
-
-
-        <DeleteChatMenu
-          dispatch={dispatch}
-          deleteMenuAnchor={deleteMenuAnchor}
-        />
-
-        {isLoading ? (
-          <Skeleton />
-        ) : (
-          <Drawer open={isMobile} onClose={handleMobileClose}>
-            <ChatList
-              w="70vw"
-              chats={data?.chats}
-              chatId={chatId}
-              handleDeleteChat={handleDeleteChat}
-              newMessagesAlert={newMessagesAlert}
-              onlineUsers={onlineUsers}
+        {/* --- DYNAMIC RESPONSIVE MOBILE SIDEBAR DRAWER OVERLAY --- */}
+        {isMobile && (
+          <div className="fixed inset-0 z-50 sm:hidden animate-fadeIn">
+            {/* Backdrop Blur Mask */}
+            <div 
+              className="absolute inset-0 bg-slate-900/10 backdrop-blur-xs" 
+              onClick={handleMobileClose} 
             />
-          </Drawer>
+            {/* Drawer Sliding Body */}
+            <div className="absolute left-0 top-0 h-full w-[75vw] max-w-xs bg-white/95 border-r border-slate-200/60 backdrop-blur-2xl shadow-2xl overflow-hidden animate-slideRight">
+              <div className="h-full overflow-y-auto no-scrollbar p-3">
+                {isLoading ? (
+                  <ChatSkeleton />
+                ) : (
+                  <ChatList
+                    w="100%"
+                    chats={data?.chats}
+                    chatId={chatId}
+                    handleDeleteChat={handleDeleteChat}
+                    newMessagesAlert={newMessagesAlert}
+                    onlineUsers={onlineUsers}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         )}
 
-        <Grid container height={"calc(100vh - 4rem)"}>
-          <Grid
-            className=" border-r-8  border-black  bg-slate-50  "
-            item
-            xs={12}
-            sm={3}
-            md={3}
-            lg={3}
-            height={"100%"}
-            sx={{
-              display: { xs: "none", sm: "block" },
-            }}
-          >
-            {isLoading ? (
-              <Skeleton />
-            ) : (
-              <ChatList
-                chats={data?.chats}
-                chatId={chatId}
-                handleDeleteChat={handleDeleteChat}
-                newMessagesAlert={newMessagesAlert}
-                onlineUsers={onlineUsers}
-              />
-            )}
-          </Grid>
-          <Grid
-            className=""
-            item
-            xs={12}
-            sm={9}
-            md={9}
-            lg={9}
-            height={"100%"}
-          >
-            <WrappedComponent {...props} chatId={chatId} user={user} />
-          </Grid>
-        </Grid>
-      </>
+        {/* --- CORE RESPONSIVE FLEXBOX/GRID WORKSPACE MATRIX --- */}
+        <div className="flex-1 flex w-full max-w-[90rem] mx-auto overflow-hidden h-[calc(100vh-4.5rem)]">
+          
+          {/* DESKTOP SIDEBAR COLUMN: Chat Session Nodes */}
+          <aside className="hidden sm:block sm:w-[30%] md:w-[25%] h-full border-r border-slate-200/50 bg-white/30 backdrop-blur-md overflow-hidden transition-all">
+            <div className="h-full overflow-y-auto no-scrollbar py-2 px-1">
+              {isLoading ? (
+                <div className="p-4"><ChatSkeleton /></div>
+              ) : (
+                <ChatList
+                  chats={data?.chats}
+                  chatId={chatId}
+                  handleDeleteChat={handleDeleteChat}
+                  newMessagesAlert={newMessagesAlert}
+                  onlineUsers={onlineUsers}
+                />
+              )}
+            </div>
+          </aside>
+
+          {/* PRIMARY CONTENT CONTEXT ARENA */}
+          <main className="flex-1 w-full h-full bg-transparent overflow-hidden relative">
+            <div className="h-full w-full overflow-y-auto no-scrollbar">
+              <WrappedComponent {...props} chatId={chatId} user={user} />
+            </div>
+          </main>
+
+        </div>
+      </div>
     );
   };
 };
