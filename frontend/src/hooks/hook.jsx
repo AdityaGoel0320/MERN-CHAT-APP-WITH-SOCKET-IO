@@ -1,13 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const useErrors = (errors = []) => {
+  const previousErrors = useRef([]);
   useEffect(() => {
-    errors.forEach(({ isError, error, fallback }) => {
-      if (isError) {
+    errors.forEach(({ isError, error, fallback }, index) => {
+      const message = typeof error === "string" ? error : error?.data?.message || "Something went wrong";
+      const fingerprint = isError ? `${error?.status || ""}:${message}` : null;
+      if (fingerprint && previousErrors.current[index] !== fingerprint) {
         if (fallback) fallback();
-        else toast.error(error?.data?.message || "Something went wrong");
+        else toast.error(message);
       }
+      previousErrors.current[index] = fingerprint;
     });
   }, [errors]);
 };
@@ -30,6 +34,7 @@ const useAsyncMutation = (mutatationHook) => {
           id: toastId,
         });
         setData(res.data);
+        return res.data;
       } else {
         toast.error(res?.error?.data?.message || "Something went wrong", {
           id: toastId,

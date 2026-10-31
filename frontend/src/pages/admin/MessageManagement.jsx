@@ -31,13 +31,14 @@ const columns = [
             const file = fileFormat(url);
 
             return (
-              <Box>
+              <Box key={url}>
                 <a
                   href={url}
                   download
                   target="_blank"
+                  rel="noopener noreferrer"
                   style={{
-                    color: "black",
+                    color: "var(--ink)",
                   }}
                 >
                   {RenderAttachment(file, url)}
@@ -88,10 +89,7 @@ const columns = [
 ];
 
 const MessageManagement = () => {
-  const { loading, data, error } = useFetchData(
-    `${server}/api/v1/admin/messages`,
-    "dashboard-messages"
-  );
+  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/messages`, key: "dashboard-messages", credentials: "include", dependencyProps: [] });
 
   useErrors([
     {

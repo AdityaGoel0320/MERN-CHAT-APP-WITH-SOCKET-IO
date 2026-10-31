@@ -39,7 +39,7 @@ To run ChatBuddy locally, follow these steps:
 2. Install dependencies for both frontend and backend:
 
    ```bash
-   cd ChatBuddy/frontend
+   cd MERN-CHAT-APP-WITH-SOCKET-IO/frontend
    npm install
    cd ../backend
    npm install
@@ -84,6 +84,29 @@ To run ChatBuddy locally, follow these steps:
 ## Usage
 
 Once the application is up and running, users can sign up, log in, and start messaging with other users in real-time. The admin panel allows administrators to manage users and content efficiently.
+
+## Updated Workspace
+
+- Shared light and dark themes for the workspace and Material UI dialogs. The theme starts from your system preference and remembers your selection locally.
+- Responsive conversation navigation, conversation filtering, touch-accessible chat actions, and a viewport-aware message composer.
+- Updated authentication, group settings, profile, and admin navigation. Signup requires a profile photo; attachments are limited to five files, each at most 5 MB.
+- Socket messages are authorized against database membership and saved before broadcasting. Failed delivery keeps the draft and reports the failure; presence supports multiple tabs.
+
+Both directories include `.env.example` templates. Configure your own backend `.env` with MongoDB, Cloudinary, and unique JWT/admin secrets. `VITE_SERVER` controls the frontend API URL, `PORT` controls the backend listener, and `CLIENT_URL` accepts comma-separated allowed frontend origins. Keep the frontend hostname consistent when testing cookies. Set `NODE_ENV=PRODUCTION` on HTTPS deployments for cross-site secure cookies.
+
+If port 5173 is occupied, use another frontend port and include its origin in `CLIENT_URL`. The template also allows `http://localhost:5175`.
+
+The previously displayed admin key has been removed. Rotate any old admin key before deploying. Deploy the updated frontend and backend together because message delivery now uses Socket.IO acknowledgements.
+
+## Verification
+
+```bash
+npm --prefix frontend run build
+npm --prefix frontend run lint
+npm --prefix backend test
+```
+
+The socket tests use isolated in-memory dependencies, not your database. End-to-end signup, messaging, and attachment tests require a running backend with valid environment configuration. The existing lint gate still includes legacy prop-validation and unused-import violations; a successful build is not a clean lint report. Review `npm audit` separately before deployment: compatible fixes do not resolve all advisories in the older toolchain.
 
 Live Deployed Link :- https://chat-buddy-with-socket-io.vercel.app/
 

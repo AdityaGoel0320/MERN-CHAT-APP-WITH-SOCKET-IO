@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, Button, Drawer, IconButton } from "@mui/material";
+import { X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar2 from "./Navbar2";
@@ -20,7 +22,7 @@ import {
 } from "../../constants/events";
 
 const AppLayout = () => (WrappedComponent) => {
-  return (props) => {
+  return function AppLayoutComponent(props) {
     const params = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -44,19 +46,21 @@ const AppLayout = () => (WrappedComponent) => {
     }, [newMessagesAlert]);
 
     const handleDeleteChat = (e, chatId, groupChat) => {
+      e.preventDefault();
       dispatch(setIsDeleteMenu(true));
       dispatch(setSelectedDeleteChat({ chatId, groupChat }));
       deleteMenuAnchor.current = e.currentTarget;
     };
 
     const handleMobileClose = () => dispatch(setIsMobile(false));
+    useEffect(() => { dispatch(setIsMobile(false)); }, [chatId, dispatch]);
 
     const newMessageAlertListener = useCallback(
       (data) => {
         if (data.chatId === chatId) return;
         dispatch(setNewMessagesAlert(data));
       },
-      [chatId]
+      [chatId, dispatch]
     );
 
     const newRequestListener = useCallback(() => {
@@ -64,7 +68,7 @@ const AppLayout = () => (WrappedComponent) => {
     }, [dispatch]);
 
     const refetchListener = useCallback(() => {
-      refetch();
+      void refetch();
       navigate("/");
     }, [refetch, navigate]);
 
@@ -82,14 +86,14 @@ const AppLayout = () => (WrappedComponent) => {
     useSocketEvents(socket, eventHandlers);
 
     return (
-      <div className="h-screen w-screen bg-gradient-to-tr from-violet-50 via-indigo-50/20 to-emerald-50 text-slate-700 flex flex-col overflow-hidden select-none relative">
+      <div className="app-shell">
         <style>{`
           .no-scrollbar::-webkit-scrollbar { display: none !important; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         `}</style>
 
         {/* Dynamic Page Metadata */}
-        <Title />
+        <Title title="ChatBuddy | Messages" />
 
         {/* Premium Core Glass Navigation */}
         <Navbar2 />
@@ -98,16 +102,9 @@ const AppLayout = () => (WrappedComponent) => {
         <DeleteChatMenu dispatch={dispatch} deleteMenuAnchor={deleteMenuAnchor} />
 
         {/* --- DYNAMIC RESPONSIVE MOBILE SIDEBAR DRAWER OVERLAY --- */}
-        {isMobile && (
-          <div className="fixed inset-0 z-50 sm:hidden animate-fadeIn">
-            {/* Backdrop Blur Mask */}
-            <div 
-              className="absolute inset-0 bg-slate-900/10 backdrop-blur-xs" 
-              onClick={handleMobileClose} 
-            />
-            {/* Drawer Sliding Body */}
-            <div className="absolute left-0 top-0 h-full w-[75vw] max-w-xs bg-white/95 border-r border-slate-200/60 backdrop-blur-2xl shadow-2xl overflow-hidden animate-slideRight">
-              <div className="h-full overflow-y-auto no-scrollbar p-3">
+        <Drawer open={isMobile} onClose={handleMobileClose} sx={{ display: { xs: "block", md: "none" } }} PaperProps={{ sx: { width: "min(340px, 88vw)" } }}>
+              <div className="flex justify-end p-2"><IconButton aria-label="Close conversations" onClick={handleMobileClose}><X size={20} /></IconButton></div>
+              <div className="overflow-y-auto p-3">
                 {isLoading ? (
                   <ChatSkeleton />
                 ) : (
@@ -118,19 +115,19 @@ const AppLayout = () => (WrappedComponent) => {
                     handleDeleteChat={handleDeleteChat}
                     newMessagesAlert={newMessagesAlert}
                     onlineUsers={onlineUsers}
+                    onSelect={handleMobileClose}
                   />
                 )}
               </div>
-            </div>
-          </div>
-        )}
+        </Drawer>
 
         {/* --- CORE RESPONSIVE FLEXBOX/GRID WORKSPACE MATRIX --- */}
-        <div className="flex-1 flex w-full max-w-[90rem] mx-auto overflow-hidden h-[calc(100vh-4.5rem)]">
+        <div className="workspace">
           
           {/* DESKTOP SIDEBAR COLUMN: Chat Session Nodes */}
-          <aside className="hidden sm:block sm:w-[30%] md:w-[25%] h-full border-r border-slate-200/50 bg-white/30 backdrop-blur-md overflow-hidden transition-all">
-            <div className="h-full overflow-y-auto no-scrollbar py-2 px-1">
+          <aside className="chat-sidebar" aria-label="Conversations">
+            <div className="h-full overflow-y-auto py-2 px-1">
+              {isError && <Alert severity="error" sx={{ m: 2 }} action={<Button color="inherit" onClick={refetch}>Retry</Button>}>Could not load conversations.</Alert>}
               {isLoading ? (
                 <div className="p-4"><ChatSkeleton /></div>
               ) : (
@@ -146,8 +143,8 @@ const AppLayout = () => (WrappedComponent) => {
           </aside>
 
           {/* PRIMARY CONTENT CONTEXT ARENA */}
-          <main className="flex-1 w-full h-full bg-transparent overflow-hidden relative">
-            <div className="h-full w-full overflow-y-auto no-scrollbar">
+          <main className="workspace-main">
+            <div className="h-full w-full">
               <WrappedComponent {...props} chatId={chatId} user={user} />
             </div>
           </main>

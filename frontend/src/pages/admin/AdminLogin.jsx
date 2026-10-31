@@ -8,8 +8,9 @@ import {
 } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
-import { bgGradient } from "../../constants/color";
+import { Navigate, Link } from "react-router-dom";
+import ThemeToggle from "../../components/shared/ThemeToggle";
+import { MessageCircle } from "lucide-react";
 import { adminLogin, getAdmin } from "../../redux/thunks/admin";
 
 const AdminLogin = () => {
@@ -31,16 +32,13 @@ const AdminLogin = () => {
   if (isAdmin) return <Navigate to="/admin/dashboard" />;
 
   return (
-    <div
-      style={{
-        backgroundImage: bgGradient,
-      }}
-    >
+    <div className="auth-page">
+      <header className="auth-header"><Link to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</Link><ThemeToggle /></header>
       <Container
         component={"main"}
         maxWidth="xs"
         sx={{
-          height: "100vh",
+          minHeight: "calc(100dvh - 92px)",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -58,7 +56,7 @@ const AdminLogin = () => {
           <Typography variant="h5">
             <p className="flex items-center justify-center uppercase font-bold text-3xl ">
 
-              Admin Login
+              Admin workspace
             </p>
           </Typography>
           <form
@@ -82,11 +80,6 @@ const AdminLogin = () => {
             />
 
 
-            <p className=" flex justify-center items-center ">
-             <strong>
-             key :- jiejrihgifdif
-              </strong>
-            </p>
             <Button
               sx={{
                 marginTop: "1rem",

@@ -1,12 +1,14 @@
 import React, { Suspense, lazy, useState } from "react";
-import { Backdrop } from "@mui/material";
+import { Avatar, Backdrop, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Bell, LogOut, MessageCircle, MessageSquarePlus, Search, Users, UserRound, Menu as MenuIcon } from "lucide-react";
+import ThemeToggle from "../shared/ThemeToggle";
+import api from "../../redux/api/api";
 import { useNavigate, NavLink } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
 import { server } from "../../constants/config";
-import { AppName } from "../../assets/FrontendUtils";
 
 import { userNotExists } from "../../redux/reducers/auth";
 
@@ -14,6 +16,7 @@ import {
   setIsNewGroup,
   setIsNotification,
   setIsSearch,
+  setIsMobile,
 } from "../../redux/reducers/misc";
 
 import { resetNotificationCount } from "../../redux/reducers/chat";
@@ -22,11 +25,12 @@ const SearchDialog = lazy(() => import("../specific/Search"));
 const NotifcationDialog = lazy(() => import("../specific/Notifications"));
 const NewGroupDialog = lazy(() => import("../specific/NewGroup"));
 
-const Navbar2 = () => {
+const Navbar2 = ({ onOpenConversations }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [anchor, setAnchor] = useState(null);
+  const { user } = useSelector((state) => state.auth);
 
   const { isSearch, isNotification, isNewGroup } = useSelector(
     (state) => state.misc
@@ -60,6 +64,7 @@ const Navbar2 = () => {
         }
       );
 
+      dispatch(api.util.resetApiState());
       dispatch(userNotExists());
 
       toast.success(data.message);
@@ -71,178 +76,30 @@ const Navbar2 = () => {
     }
   };
 
+  const actions = [
+    { label: "Find people", icon: Search, run: openSearch },
+    { label: "New group", icon: MessageSquarePlus, run: openNewGroup },
+    { label: "Manage groups", icon: Users, run: navigateToGroup },
+  ];
   return (
     <>
-      {/* Navbar */}
-
-      <nav className="bg-black text-white px-6 py-4 flex justify-between items-center shadow-md">
-
-        {/* Logo */}
-
-        <div className="text-2xl font-bold">
-          {AppName}
+      <header className="app-header">
+        <div className="flex items-center gap-2 min-w-0">
+          <Tooltip title="Conversations"><button className="icon-button mobile-only" aria-label="Open conversations" onClick={onOpenConversations || (() => dispatch(setIsMobile(true)))}><MenuIcon size={20} /></button></Tooltip>
+          <NavLink to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</NavLink>
         </div>
-
-        {/* Desktop Menu */}
-
-        <ul className="hidden md:flex items-center gap-8 font-medium">
-
-          <li>
-            <button
-              className="hover:text-gray-300 transition"
-              onClick={openSearch}
-            >
-              Search
-            </button>
-          </li>
-
-          <li>
-            <button
-              className="hover:text-gray-300 transition"
-              onClick={openNewGroup}
-            >
-              New Group
-            </button>
-          </li>
-
-          <li>
-            <button
-              className="hover:text-gray-300 transition"
-              onClick={navigateToGroup}
-            >
-              Manage Groups
-            </button>
-          </li>
-
-          <li>
-            <button
-              className="hover:text-gray-300 transition"
-              onClick={openNotification}
-            >
-              Notifications
-
-              {notificationCount > 0 && (
-                <span className="ml-1 text-red-500">
-                  ({notificationCount})
-                </span>
-              )}
-            </button>
-          </li>
-
-          <li>
-            <button
-              className="hover:text-gray-300 transition"
-              onClick={logoutHandler}
-            >
-              Logout
-            </button>
-          </li>
-
-          <li>
-            <NavLink
-              to="/user"
-              className="hover:text-gray-300 transition"
-            >
-              Profile
-            </NavLink>
-          </li>
-
-        </ul>
-
-        {/* Mobile Hamburger */}
-
-        <button
-          className="md:hidden text-3xl"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
-
-      </nav>
-
-      {/* Mobile Menu */}
-
-      {menuOpen && (
-
-        <div className="md:hidden bg-black text-white px-6 py-5">
-
-          <ul className="flex flex-col gap-5 text-lg">
-
-            <li>
-              <button
-                onClick={() => {
-                  openSearch();
-                  setMenuOpen(false);
-                }}
-              >
-                Search
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => {
-                  openNewGroup();
-                  setMenuOpen(false);
-                }}
-              >
-                New Group
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => {
-                  navigateToGroup();
-                  setMenuOpen(false);
-                }}
-              >
-                Manage Groups
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => {
-                  openNotification();
-                  setMenuOpen(false);
-                }}
-              >
-                Notifications
-
-                {notificationCount > 0 && (
-                  <span className="ml-1 text-red-500">
-                    ({notificationCount})
-                  </span>
-                )}
-              </button>
-            </li>
-
-            <li>
-              <button
-                onClick={() => {
-                  logoutHandler();
-                  setMenuOpen(false);
-                }}
-              >
-                Logout
-              </button>
-            </li>
-
-            <li>
-              <NavLink
-                to="/user"
-                onClick={() => setMenuOpen(false)}
-              >
-                Profile
-              </NavLink>
-            </li>
-
-          </ul>
-
-        </div>
-
-      )}
+        <nav aria-label="Workspace actions" className="header-actions">
+          {actions.map(({ label, icon: Icon, run }) => <Tooltip title={label} key={label}><button aria-label={label} onClick={run} className="icon-button desktop-only"><Icon size={19} /></button></Tooltip>)}
+          <ThemeToggle />
+          <Tooltip title="Notifications"><button className="icon-button relative" aria-label="Notifications" onClick={openNotification}><Bell size={19} />{notificationCount > 0 && <span className="notification-dot">{notificationCount > 9 ? "9+" : notificationCount}</span>}</button></Tooltip>
+          <Tooltip title="Account menu"><button className="icon-button" aria-label="Account menu" aria-haspopup="menu" aria-expanded={Boolean(anchor)} onClick={(event) => setAnchor(event.currentTarget)}><Avatar src={user?.avatar?.url} alt={user?.name} sx={{ width: 30, height: 30, fontSize: 13 }}>{user?.name?.[0]}</Avatar></button></Tooltip>
+        </nav>
+      </header>
+      <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>
+        {actions.map(({ label, icon: Icon, run }) => <MenuItem key={label} onClick={() => { setAnchor(null); run(); }} sx={{ gap: 1.5 }}><Icon size={17} />{label}</MenuItem>)}
+        <MenuItem onClick={() => { setAnchor(null); navigate("/user"); }} sx={{ gap: 1.5 }}><UserRound size={17} />My profile</MenuItem>
+        <MenuItem onClick={() => { setAnchor(null); void logoutHandler(); }} sx={{ gap: 1.5, color: "error.main" }}><LogOut size={17} />Sign out</MenuItem>
+      </Menu>
 
       {/* Dialogs */}
 

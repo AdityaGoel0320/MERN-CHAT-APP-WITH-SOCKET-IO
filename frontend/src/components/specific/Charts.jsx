@@ -11,12 +11,7 @@ import {
 } from "chart.js";
 import React from "react";
 import { Doughnut, Line } from "react-chartjs-2";
-import {
-  orange,
-  orangeLight,
-  purple,
-  purpleLight,
-} from "../../constants/color";
+import { useTheme } from "@mui/material";
 import { getLast7Days } from "../../lib/features";
 
 ChartJS.register(
@@ -59,6 +54,7 @@ const lineChartOptions = {
 };
 
 const LineChart = ({ value = [] }) => {
+  const theme = useTheme();
   const data = {
     labels,
     datasets: [
@@ -66,13 +62,19 @@ const LineChart = ({ value = [] }) => {
         data: value,
         label: "Messages",
         fill: true,
-        backgroundColor: purpleLight,
-        borderColor: purple,
+        backgroundColor: `${theme.palette.primary.main}20`,
+        borderColor: theme.palette.primary.main,
+        tension: 0.35,
+        pointRadius: 3,
       },
     ],
   };
 
-  return <Line data={data} options={lineChartOptions} />;
+  const options = { ...lineChartOptions, scales: {
+    x: { ...lineChartOptions.scales.x, ticks: { color: theme.palette.text.secondary } },
+    y: { ...lineChartOptions.scales.y, ticks: { color: theme.palette.text.secondary, precision: 0 } },
+  } };
+  return <Line data={data} options={options} />;
 };
 
 const doughnutChartOptions = {
@@ -82,19 +84,21 @@ const doughnutChartOptions = {
       display: false,
     },
   },
-  cutout: 120,
+  cutout: "70%",
 };
 
 const DoughnutChart = ({ value = [], labels = [] }) => {
+  const theme = useTheme();
   const data = {
     labels,
     datasets: [
       {
         data: value,
-        backgroundColor: [purpleLight, orangeLight],
-        hoverBackgroundColor: [purple, orange],
-        borderColor: [purple, orange],
-        offset: 40,
+        backgroundColor: [theme.palette.primary.main, "#438bc2"],
+        hoverBackgroundColor: [theme.palette.primary.main, "#60a5d5"],
+        borderColor: theme.palette.background.paper,
+        borderWidth: 3,
+        offset: 0,
       },
     ],
   };

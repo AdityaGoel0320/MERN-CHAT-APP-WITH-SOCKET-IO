@@ -1,1 +1,1 @@
-export const server = "http://localhost:8000"
+export const server = (import.meta.env.VITE_SERVER || "http://localhost:1111").replace(/\/$/, "");

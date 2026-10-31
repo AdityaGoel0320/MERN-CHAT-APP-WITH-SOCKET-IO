@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
+    "test": "node --test lib/socketHandlers.test.js",
     "code": "nodemon app.js -e hbs,js,jsx,.env,html"
   },
   "keywords": [],

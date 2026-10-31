@@ -68,52 +68,29 @@ import React from 'react';
 import { useSelector } from "react-redux";
 import moment from "moment";
 import { transformImage } from "../../lib/features";
-import { BrowserRouter, NavLink, Routes, Route } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { Avatar } from "@mui/material";
+import { AtSign, CalendarDays, Shield, UserRound } from "lucide-react";
+import AppLayout from "../layout/AppLayout";
 
 
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <>
-      <div className='bg-black border-4 w-fit rounded-3xl text-white  p-2   '>
-        <NavLink to="/">
-
-          Back
-        </NavLink>
-      </div>
-      <div className='flex justify-center items-center h-[80vh]'>
-        <div className=" p-6">
-          <div className="flex items-center justify-center">
-            <img
-              src={transformImage(user.avatar?.url)}
-              alt="User Avatar"
-              className="w-32 h-32 object-cover rounded-full border-4 border-white"
-            />
-          </div>
-          <div className="mt-6 text-center">
-            <h2 className="text-2xl font-bold text-white mb-2">{user.name}</h2>
-            <p className="text-gray-200">Name: <span className="font-bold">{user.name}</span></p>
-            <p className="text-gray-200">Username: <span className="font-bold">@{user.username}</span></p>
-            <p className="text-gray-200">Joined <span className="font-bold">{moment(user.createdAt).fromNow()}</span></p>
-            <p className="text-gray-200 font-bold mt-4">{user.bio}</p>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h1 className='flex justify-center items-center m-4 font-bold'>
-          If you have admin key than click on
-          <br />
-          <NavLink to="/admin">
-
-          <button className= 'ml-2 bg-yellow-500 border-black border-4 font-bold  p-2 rounded-2xl '> Admin Page</button>
-          </NavLink>
-        </h1>
-      </div>
-    </>
+    <section className="profile-page">
+      <p className="eyebrow">ACCOUNT</p><h1>My profile</h1>
+      <div className="profile-identity"><Avatar src={user.avatar?.url ? transformImage(user.avatar.url) : undefined} alt={user.name} sx={{ width: 88, height: 88 }}>{user.name?.[0]}</Avatar><div><h2>{user.name}</h2><p>@{user.username}</p></div></div>
+      <dl className="profile-details">
+        <div><dt><UserRound size={18} />Full name</dt><dd>{user.name}</dd></div>
+        <div><dt><AtSign size={18} />Username</dt><dd>{user.username}</dd></div>
+        <div><dt><CalendarDays size={18} />Joined</dt><dd>{moment(user.createdAt).format("MMMM D, YYYY")}</dd></div>
+        <div><dt>Bio</dt><dd>{user.bio || "No bio yet"}</dd></div>
+      </dl>
+      <NavLink to="/admin" className="admin-link"><Shield size={17} />Admin workspace</NavLink>
+    </section>
 
   );
 };
 
-export default UserProfile;
+export default AppLayout()(UserProfile);

@@ -1,20 +1,20 @@
 import React from "react";
 import { DataGrid } from "@mui/x-data-grid";
 import { Container, Paper, Typography } from "@mui/material";
-import { matBlack } from "../../constants/color";
 
 const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
   return (
     <Container
       sx={{
-        height: "100vh",
+        height: "100%",
+        minHeight: 500,
       }}
     >
       <Paper
         elevation={3}
         sx={{
-          padding: "1rem 4rem",
-          borderRadius: "1rem",
+          padding: { xs: "1rem", md: "1.5rem" },
+          borderRadius: 0,
           margin: "auto",
           width: "100%",
           overflow: "hidden",
@@ -23,11 +23,10 @@ const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
         }}
       >
         <Typography
-          textAlign={"center"}
-          variant="h4"
+          variant="h5"
           sx={{
-            margin: "2rem",
-            textTransform: "uppercase",
+            margin: "0 0 1.5rem",
+            fontWeight: 700,
           }}
         >
           {heading}
@@ -42,8 +41,8 @@ const Table = ({ rows, columns, heading, rowHeight = 52 }) => {
           sx={{
             border: "none",
             ".table-header": {
-              bgcolor: matBlack,
-              color: "white",
+              bgcolor: "var(--surface-soft)",
+              color: "var(--ink)",
             },
           }}
         />

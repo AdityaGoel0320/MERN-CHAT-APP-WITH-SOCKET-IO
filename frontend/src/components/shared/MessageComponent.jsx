@@ -8,7 +8,7 @@ const MessageComponent = ({ message, user }) => {
   const { sender, content, attachments = [], createdAt } = message;
 
   const sameSender = sender?._id === user?._id;
-  const timeAgo = moment(createdAt).fromNow();
+  const timeAgo = moment(createdAt).format("h:mm A");
 
   return (
     <motion.div
@@ -16,15 +16,11 @@ const MessageComponent = ({ message, user }) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
       style={{ alignSelf: sameSender ? "flex-end" : "flex-start" }}
-      className={`flex flex-col max-w-[85%] md:max-w-[70%] p-3.5 relative shadow-sm transition-all ${
-        sameSender
-          ? "ml-auto bg-indigo-600 text-white rounded-[1.25rem] rounded-br-sm border border-indigo-500 shadow-[0_10px_25px_-5px_rgba(79,70,229,0.3)]"
-          : "mr-auto bg-white/80 text-slate-800 rounded-[1.25rem] rounded-bl-sm border border-white/60 backdrop-blur-xl"
-      }`}
+      className={`message-bubble ${sameSender ? "sent" : "received"}`}
     >
       {/* Sender Header Label */}
       {!sameSender && (
-        <span className="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600 mb-1.5 block">
+        <span className="message-sender">
           {sender?.name || "Unknown"}
         </span>
       )}
@@ -50,11 +46,7 @@ const MessageComponent = ({ message, user }) => {
                 target="_blank"
                 rel="noopener noreferrer"
                 download
-                className={`block overflow-hidden rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-95 ${
-                  sameSender 
-                    ? "border-indigo-400/50 hover:shadow-lg hover:shadow-indigo-900/20" 
-                    : "border-slate-200/60 hover:shadow-md"
-                }`}
+                className="message-attachment"
               >
                 {RenderAttachment(file, url)}
               </a>
@@ -65,9 +57,8 @@ const MessageComponent = ({ message, user }) => {
 
       {/* Timestamp */}
       <span
-        className={`text-[9px] font-bold tracking-wider mt-2 flex items-center justify-end ${
-          sameSender ? "text-indigo-200" : "text-slate-400"
-        }`}
+        className="message-time"
+        title={moment(createdAt).format("LLL")}
       >
         {timeAgo}
       </span>

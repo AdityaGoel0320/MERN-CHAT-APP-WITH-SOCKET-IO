@@ -10,7 +10,7 @@ import { adminSecretKey } from "../app.js";
 const adminLogin = TryCatch(async (req, res, next) => {
   const { secretKey } = req.body;
 
-  const isMatched = secretKey === adminSecretKey;
+  const isMatched = typeof adminSecretKey === "string" && adminSecretKey.length > 0 && secretKey === adminSecretKey;
 
   if (!isMatched) return next(new ErrorHandler("Invalid Admin Key", 401));
 

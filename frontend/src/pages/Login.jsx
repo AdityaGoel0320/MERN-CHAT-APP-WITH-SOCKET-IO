@@ -6,18 +6,21 @@ import { useFileHandler, useInputValidation } from "6pp";
 import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
 import { usernameValidator } from "../utils/validators";
+import { ArrowRight, Camera, Eye, EyeOff, LoaderCircle, MessageCircle } from "lucide-react";
+import ThemeToggle from "../components/shared/ThemeToggle";
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [signUpStep, setSignUpStep] = useState(1); // 1: Profile Info, 2: Account Security
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   // 6pp validation custom hooks
   const name = useInputValidation("");
   const bio = useInputValidation("");
   const username = useInputValidation("", usernameValidator);
   const password = useInputValidation("");
-  const avatar = useFileHandler("single");
+  const avatar = useFileHandler("single", 5);
 
   const dispatch = useDispatch();
 
@@ -29,8 +32,8 @@ const Login = () => {
   const handleNextStep = (e) => {
     e.preventDefault();
     // Basic validation before moving forward
-    if (!name.value || !bio.value) {
-      toast.error("Please complete all profile details");
+    if (!name.value.trim() || !bio.value.trim() || !avatar.file || avatar.error) {
+      toast.error("Add a profile photo, your name, and a bio");
       return;
     }
     setSignUpStep(2);
@@ -67,6 +70,10 @@ const Login = () => {
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+    if (username.error || avatar.error || !avatar.file) {
+      toast.error(username.error || avatar.error || "Choose a profile photo");
+      return;
+    }
     const toastId = toast.loading("Signing Up...");
     setIsLoading(true);
 
@@ -95,23 +102,18 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-screen bg-gradient-to-tr from-violet-100 via-indigo-50 to-emerald-50 text-slate-700 flex justify-center items-center p-4 md:p-8 relative overflow-hidden select-none">
-      
-      {/* --- BACKGROUND PASTEL AMBIENT ORBS --- */}
-      <div className="absolute top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-violet-200/50 blur-[100px] pointer-events-none animate-pulse duration-[8000ms]" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[45vw] h-[45vw] rounded-full bg-emerald-100/60 blur-[120px] pointer-events-none animate-bounce duration-[12000ms] opacity-70" />
+    <div className="auth-page">
+      <header className="auth-header"><a href="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</a><ThemeToggle /></header>
+      <main className="auth-main">
 
       {/* --- RESPONSIVE GLASS CONTAINER --- */}
-      <div className="w-full max-w-md max-h-[90vh] flex flex-col justify-between p-6 sm:p-8 rounded-[2.5rem] bg-white/70 border border-white/50 backdrop-blur-2xl shadow-[0_20px_50px_rgba(79,70,229,0.08)] z-10 overflow-hidden transition-all duration-300">
+      <section className="auth-form-section auth-panel">
         
         {/* Header Branding section */}
-        <div className="text-center mb-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-indigo-600/10 text-indigo-600 mb-2 border border-indigo-500/20">
-            <i className="fas fa-comments text-xl" />
-          </div>
-          <h2 className="text-2xl font-black uppercase tracking-wider bg-gradient-to-r from-indigo-700 to-violet-600 bg-clip-text text-transparent">
-            {isLogin ? "Welcome Back" : "Join Network"}
-          </h2>
+        <div className="mb-7">
+          <p className="eyebrow">LET&apos;S CONNECT</p>
+          <h1>{isLogin ? "Welcome back." : "Create your account."}</h1>
+          <p className="auth-subtitle">{isLogin ? "Sign in to your ChatBuddy workspace." : `Step ${signUpStep} of 2`}</p>
           {!isLogin && (
             <div className="flex justify-center items-center gap-2 mt-2">
               <span className={`w-8 h-1.5 rounded-full transition-all duration-300 ${signUpStep === 1 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
@@ -126,8 +128,10 @@ const Login = () => {
             /* --- LOGIN FORM --- */
             <form onSubmit={handleLogin} className="space-y-4 animate-fadeIn">
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Username</label>
+                <label htmlFor="login-username">Username</label>
                 <input
+                  id="login-username"
+                  autoComplete="username"
                   type="text"
                   required
                   value={username.value}
@@ -138,15 +142,20 @@ const Login = () => {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Password</label>
+                <label htmlFor="login-password">Password</label>
+                <div className="password-control">
                 <input
-                  type="password"
+                  id="login-password"
+                  autoComplete="current-password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password.value}
                   onChange={password.changeHandler}
                   className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-indigo-500 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
                   placeholder="••••••••"
                 />
+                <button type="button" className="icon-button" aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((current) => !current)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                </div>
               </div>
 
               <button
@@ -154,8 +163,8 @@ const Login = () => {
                 disabled={isLoading}
                 className="w-full py-3 mt-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white font-extrabold text-sm uppercase tracking-widest shadow-md transition-all duration-150 flex items-center justify-center gap-2"
               >
-                {isLoading && <i className="fas fa-spinner animate-spin" />}
-                Sign In
+                {isLoading && <LoaderCircle size={18} className="animate-spin" />}
+                {isLoading ? "Signing in..." : "Sign in"}<ArrowRight size={18} />
               </button>
             </form>
           ) : (
@@ -165,19 +174,14 @@ const Login = () => {
                 /* STEP 1: Profile Customization */
                 <form onSubmit={handleNextStep} className="space-y-4 animate-fadeIn">
                   <div className="flex flex-col items-center group relative my-1">
-                    <div className="relative w-24 h-24 rounded-full overflow-hidden border-2 border-dashed border-slate-300 group-hover:border-indigo-500 transition-colors duration-200 bg-white/80 shadow-sm">
-                      <img
-                        src={avatar.preview || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=150&auto=format&fit=crop"}
-                        alt="Avatar"
-                        className="w-full h-full object-cover"
-                      />
-                      <label className="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity duration-200">
-                        <i className="fas fa-camera text-white text-lg" />
+                    <div className="avatar-upload">
+                      {avatar.preview ? <img src={avatar.preview} alt="Profile preview" /> : <span className="avatar-placeholder"><Camera size={24} /></span>}
+                      <label htmlFor="signup-avatar">Profile photo
                         <input
+                          id="signup-avatar"
                           type="file"
                           accept="image/*"
                           onChange={avatar.changeHandler}
-                          className="hidden"
                         />
                       </label>
                     </div>
@@ -187,20 +191,25 @@ const Login = () => {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Full Name</label>
+                    <label htmlFor="signup-name">Full name</label>
                     <input
+                      id="signup-name"
+                      autoComplete="name"
+                      maxLength={80}
                       type="text"
                       required
                       value={name.value}
                       onChange={name.changeHandler}
                       className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-indigo-500 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
-                      placeholder="Aditya Goel"
+                      placeholder="Your full name"
                     />
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Bio</label>
+                    <label htmlFor="signup-bio">Bio</label>
                     <input
+                      id="signup-bio"
+                      maxLength={200}
                       type="text"
                       required
                       value={bio.value}
@@ -214,21 +223,24 @@ const Login = () => {
                     type="submit"
                     className="w-full py-3 mt-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-extrabold text-sm uppercase tracking-widest shadow-md transition-all duration-150 flex items-center justify-center gap-2"
                   >
-                    Continue <i className="fas fa-arrow-right text-xs" />
+                    Continue <ArrowRight size={18} />
                   </button>
                 </form>
               ) : (
                 /* STEP 2: Account Security Setup */
                 <form onSubmit={handleSignUp} className="space-y-4 animate-fadeIn">
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Username</label>
+                    <label htmlFor="signup-username">Username</label>
                     <input
+                      id="signup-username"
+                      autoComplete="username"
+                      aria-invalid={Boolean(username.error)}
                       type="text"
                       required
                       value={username.value}
                       onChange={username.changeHandler}
                       className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-indigo-500 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
-                      placeholder="aditya_goel"
+                      placeholder="Choose a username"
                     />
                     {username.error && (
                       <span className="text-red-500 text-[10px] font-medium mt-0.5">{username.error}</span>
@@ -236,15 +248,21 @@ const Login = () => {
                   </div>
 
                   <div className="flex flex-col gap-1">
-                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Password</label>
+                    <label htmlFor="signup-password">Password</label>
+                    <div className="password-control">
                     <input
-                      type="password"
+                      id="signup-password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      type={showPassword ? "text" : "password"}
                       required
                       value={password.value}
                       onChange={password.changeHandler}
                       className="w-full px-4 py-2.5 rounded-xl bg-white/80 border border-slate-200 focus:border-indigo-500 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-all duration-200 shadow-sm"
                       placeholder="••••••••"
                     />
+                    <button type="button" className="icon-button" aria-label={showPassword ? "Hide password" : "Show password"} title={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword((current) => !current)}>{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                    </div>
                   </div>
 
                   <div className="flex gap-3 mt-2">
@@ -257,11 +275,11 @@ const Login = () => {
                     </button>
                     <button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isLoading || Boolean(username.error)}
                       className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-400 text-white font-extrabold text-sm uppercase tracking-widest shadow-md transition-all duration-150 flex items-center justify-center gap-2"
                     >
-                      {isLoading && <i className="fas fa-spinner animate-spin" />}
-                      Register
+                      {isLoading && <LoaderCircle size={18} className="animate-spin" />}
+                      {isLoading ? "Creating account..." : "Create account"}
                     </button>
                   </div>
                 </form>
@@ -272,11 +290,6 @@ const Login = () => {
 
         {/* Dynamic Navigation Toggle Footer Area */}
         <div className="mt-4 space-y-3">
-          <div className="flex items-center text-[10px] font-bold tracking-widest text-slate-400">
-            <div className="flex-1 border-t border-slate-200"></div>
-            <span className="px-3">SECURE GATEWAY</span>
-            <div className="flex-1 border-t border-slate-200"></div>
-          </div>
 
           <button
             type="button"
@@ -284,10 +297,13 @@ const Login = () => {
             onClick={toggleLogin}
             className="w-full py-2 text-indigo-600 hover:text-indigo-500 font-bold text-xs transition-colors duration-150 focus:outline-none"
           >
-            {isLogin ? "Create an account instead" : "Back to active authorization portal"}
+            {isLogin ? "Create an account" : "Already have an account? Sign in"}
           </button>
         </div>
-      </div>
+      </section>
+      <aside className="auth-visual" aria-label="ChatBuddy workspace"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85" alt="A team working together around a table" /><div className="auth-visual-caption"><span>CHATBUDDY</span><h2>A place for your people.</h2></div></aside>
+      </main>
+      <footer className="auth-footer">ChatBuddy &copy; {new Date().getFullYear()}</footer>
     </div>
   );
 };

@@ -1,4 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
+import { Search, MessageSquarePlus, MessagesSquare } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { setIsSearch } from "../../redux/reducers/misc";
 import ChatItem from "../shared/ChatItem";
 
 const ChatList = ({
@@ -13,21 +16,21 @@ const ChatList = ({
     },
   ],
   handleDeleteChat,
+  onSelect,
 }) => {
+  const [query, setQuery] = useState("");
+  const dispatch = useDispatch();
+  const filteredChats = chats.filter((chat) => chat.name?.toLowerCase().includes(query.toLowerCase()));
   return (
     <div
       style={{ width: w }}
-      className="h-full flex flex-col overflow-y-auto no-scrollbar space-y-1 py-2 px-2 select-none"
+      className="conversation-list"
     >
-      {/* Dynamic inline styles to hide layout scroll tracks natively inside sub-layout side panels */}
-      <style>{`
-        div::-webkit-scrollbar {
-          display: none !important;
-        }
-      `}</style>
-
-      {chats && chats.length > 0 ? (
-        chats.map((data, index) => {
+      <div className="sidebar-heading"><h2>Messages <span>{chats.length}</span></h2><button className="icon-button" aria-label="Start a conversation" title="Start a conversation" onClick={() => dispatch(setIsSearch(true))}><MessageSquarePlus size={19} /></button></div>
+      <label className="conversation-search"><Search size={17} /><input aria-label="Search conversations" placeholder="Search conversations" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+      <p className="sidebar-label">ALL CONVERSATIONS</p>
+      {filteredChats.length > 0 ? (
+        filteredChats.map((data) => {
           const { avatar, _id, name, groupChat, members } = data;
 
           const newMessageAlert = newMessagesAlert.find(
@@ -41,10 +44,10 @@ const ChatList = ({
           return (
             <div 
               key={_id} 
-              className="w-full transition-transform duration-150 active:scale-[0.99]"
+              className="w-full"
             >
               <ChatItem
-                index={index}
+                onSelect={onSelect}
                 newMessageAlert={newMessageAlert}
                 isOnline={isOnline}
                 avatar={avatar}
@@ -58,13 +61,10 @@ const ChatList = ({
           );
         })
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center opacity-60">
-          <div className="w-12 h-12 rounded-2xl bg-white/80 border border-slate-100 flex items-center justify-center text-slate-400 mb-2 shadow-sm">
-            <i className="fas fa-folder-open text-base" />
-          </div>
-          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-            No active conversations
-          </p>
+        <div className="sidebar-empty">
+          <MessagesSquare size={28} />
+          <p>{query ? "No matching conversations" : "No conversations yet"}</p>
+          {!query && <button className="text-action" onClick={() => dispatch(setIsSearch(true))}>Find people</button>}
         </div>
       )}
     </div>

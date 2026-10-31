@@ -6,6 +6,9 @@ import AvatarCard from "../components/shared/AvatarCard";
 import UserItem from "../components/shared/UserItem";
 import { LayoutLoader } from "../components/layout/Loaders";
 import { setIsAddMember } from "../redux/reducers/misc";
+import { ArrowLeft, Check, LoaderCircle, Menu, Pencil, Trash2, UserPlus, Users, X } from "lucide-react";
+import { Drawer, IconButton } from "@mui/material";
+import Navbar2 from "../components/layout/Navbar2";
 import {
   useChatDetailsQuery,
   useDeleteChatMutation,
@@ -66,19 +69,20 @@ const Groups = () => {
   const handleMobile = () => setIsMobileMenuOpen((prev) => !prev);
   const handleMobileClose = () => setIsMobileMenuOpen(false);
 
-  const updateGroupName = () => {
-    setIsEdit(false);
-    updateGroup("Updating Group Name...", { chatId, name: groupNameUpdatedValue });
+  const updateGroupName = async () => {
+    if (!groupNameUpdatedValue.trim()) return;
+    const result = await updateGroup("Updating Group Name...", { chatId, name: groupNameUpdatedValue.trim() });
+    if (result) setIsEdit(false);
   };
 
   const openConfirmDeleteHandler = () => setConfirmDeleteDialog(true);
   const closeConfirmDeleteHandler = () => setConfirmDeleteDialog(false);
   const openAddMemberHandler = () => dispatch(setIsAddMember(true));
 
-  const deleteHandler = () => {
-    deleteGroup("Deleting Group...", chatId);
+  const deleteHandler = async () => {
+    const result = await deleteGroup("Deleting Group...", chatId);
     closeConfirmDeleteHandler();
-    navigate("/groups");
+    if (result) navigate("/groups");
   };
 
   const removeMemberHandler = (userId) => {
@@ -86,73 +90,73 @@ const Groups = () => {
   };
 
   useEffect(() => {
-    if (chatId) {
-      setGroupName(`Group Name ${chatId}`);
-      setGroupNameUpdatedValue(`Group Name ${chatId}`);
-    }
-    return () => {
-      setGroupName("");
-      setGroupNameUpdatedValue("");
-      setIsEdit(false);
-    };
-  }, [chatId]);
+    setIsMobileMenuOpen(false);
+    setConfirmDeleteDialog(false);
+    dispatch(setIsAddMember(false));
+  }, [chatId, dispatch]);
 
   const IconBtns = (
     <>
       {/* Mobile Toggle Trigger */}
-      <div className="sm:hidden fixed top-4 right-4 z-50">
+      <div className="mobile-only">
         <button
+          aria-label="Open groups"
           onClick={handleMobile}
-          className="p-3 rounded-2xl bg-white/80 border border-slate-200 text-slate-700 backdrop-blur-md shadow-md hover:bg-white transition-all"
+          className="icon-button"
         >
-          <i className="fas fa-bars text-lg" />
+          <Menu size={20} />
         </button>
       </div>
 
       {/* Global Navigation Back Button */}
       <button
         onClick={navigateBack}
-        className="absolute top-6 left-6 z-40 p-3 rounded-2xl bg-white/80 border border-slate-200/60 text-indigo-600 backdrop-blur-md hover:bg-white shadow-sm hover:scale-105 transition-all"
+        className="icon-button"
+        aria-label="Back to messages"
         title="Back"
       >
-        <i className="fas fa-arrow-left text-lg" />
+        <ArrowLeft size={20} />
       </button>
     </>
   );
 
   const GroupNameHeader = (
-    <div className="flex items-center justify-center gap-3 p-4 mt-8 w-full max-w-xl">
+    <div className="group-name-header">
       {isEdit ? (
         <div className="flex w-full items-center gap-2">
           <input
             type="text"
+            aria-label="Group name"
+            maxLength={80}
             value={groupNameUpdatedValue}
             onChange={(e) => setGroupNameUpdatedValue(e.target.value)}
             className="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-slate-200/80 text-slate-800 text-lg font-bold outline-none focus:ring-2 focus:ring-indigo-500/20 transition-all shadow-sm"
           />
           <button
             onClick={updateGroupName}
-            disabled={isLoadingGroupName}
+            disabled={isLoadingGroupName || !groupNameUpdatedValue.trim()}
+            aria-label="Save group name"
             className="flex items-center justify-center h-11 w-11 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm transition-all disabled:opacity-50"
           >
             {isLoadingGroupName ? (
-              <i className="fas fa-spinner animate-spin" />
+              <LoaderCircle size={18} className="animate-spin" />
             ) : (
-              <i className="fas fa-check" />
+              <Check size={18} />
             )}
           </button>
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          <h1 className="text-2xl sm:text-3xl font-black bg-gradient-to-r from-slate-800 to-indigo-950 bg-clip-text text-transparent">
+          <h1>
             {groupName}
           </h1>
           <button
             disabled={isLoadingGroupName}
+            aria-label="Rename group"
             onClick={() => setIsEdit(true)}
             className="flex items-center justify-center h-9 w-9 rounded-xl bg-white/80 border border-slate-200 text-slate-500 hover:text-indigo-600 hover:bg-white shadow-sm transition-all"
           >
-            <i className="fas fa-pen text-xs" />
+            <Pencil size={16} />
           </button>
         </div>
       )}
@@ -163,15 +167,16 @@ const Groups = () => {
     <div className="flex w-full max-w-xl flex-col-reverse sm:flex-row gap-3 mt-6">
       <button
         onClick={openConfirmDeleteHandler}
+        disabled={isLoadingDeleteGroup}
         className="flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-rose-50 border border-rose-200/40 text-rose-600 font-bold text-xs uppercase tracking-widest hover:bg-rose-100/60 transition-all"
       >
-        <i className="fas fa-trash-alt" /> Delete Group
+        <Trash2 size={17} /> Delete group
       </button>
       <button
         onClick={openAddMemberHandler}
         className="flex-[2] flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-indigo-600 text-white font-bold text-xs uppercase tracking-widest hover:bg-indigo-500 shadow-md transition-all"
       >
-        <i className="fas fa-user-plus" /> Add Member
+        <UserPlus size={17} /> Add members
       </button>
     </div>
   );
@@ -179,33 +184,35 @@ const Groups = () => {
   return myGroups.isLoading ? (
     <LayoutLoader />
   ) : (
-    <div className="grid grid-cols-12 h-screen w-screen bg-gradient-to-tr from-violet-50 via-indigo-50/30 to-emerald-50 text-slate-700 overflow-hidden select-none relative">
+    <div className="app-shell">
+      <Navbar2 onOpenConversations={handleMobile} />
+      <div className="group-workspace">
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Ambient background decoration */}
-      <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-violet-200/30 blur-[120px] pointer-events-none" />
 
       {/* Desktop Sidebar Column */}
-      <div className="hidden sm:block sm:col-span-4 border-r border-slate-200/60 h-full overflow-hidden bg-white/40 backdrop-blur-md">
+      <aside className="chat-sidebar">
         <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
-      </div>
+      </aside>
 
       {/* Primary Context Arena Grid */}
-      <div className="col-span-12 sm:col-span-8 flex flex-col items-center p-6 relative h-full justify-between overflow-hidden">
-        {IconBtns}
+      <main className="group-main group-panel">
+        <div className="flex items-center justify-between w-full">{IconBtns}<span className="eyebrow">GROUP SETTINGS</span></div>
 
         {chatId ? (
-          <div className="w-full flex-1 flex flex-col items-center justify-between overflow-hidden">
+          <div className="w-full flex flex-col items-center">
+            {groupDetails.isLoading ? <LoaderCircle className="animate-spin" size={24} /> : <>
             {GroupNameHeader}
 
             {/* Inner Workspace Glass Area */}
-            <div className="w-full max-w-xl flex-1 flex flex-col my-4 p-5 sm:p-6 rounded-[2rem] bg-white/60 border border-white/80 backdrop-blur-xl shadow-sm overflow-hidden">
+            <section className="group-members">
               <div className="mb-4">
                 <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Active Network Nodes ({members.length})
+                  Members ({members.length})
                 </h2>
               </div>
 
@@ -213,31 +220,29 @@ const Groups = () => {
               <div className="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar">
                 {isLoadingRemoveMember ? (
                   <div className="flex justify-center items-center h-full py-10">
-                    <i className="fas fa-spinner animate-spin text-2xl text-indigo-600" />
+                    <LoaderCircle size={24} className="animate-spin" />
                   </div>
                 ) : (
                   members.map((i) => (
-                    <div key={i._id} className="p-0.5 rounded-xl bg-white/40 border border-white/60 shadow-none hover:bg-white/80 transition-all">
+                    <div key={i._id} className="member-row">
                       <UserItem user={i} isAdded handler={removeMemberHandler} />
                     </div>
                   ))
                 )}
               </div>
-            </div>
+            </section>
 
             {ButtonGroup}
+            </>}
           </div>
         ) : (
-          <div className="flex-1 flex flex-col justify-center items-center opacity-60 text-center animate-fadeIn">
-            <div className="w-16 h-16 rounded-2xl bg-white/80 border border-white/60 flex items-center justify-center text-indigo-500 shadow-sm mb-3">
-              <i className="fas fa-users-cog text-xl" />
-            </div>
-            <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-              Select a group cluster to map nodes
-            </p>
+          <div className="sidebar-empty my-auto">
+            <Users size={40} />
+            <h1>Groups</h1>
+            <p>No group selected</p>
           </div>
         )}
-      </div>
+      </main>
 
       {/* Dialog Suspense Portals */}
       {isAddMember && (
@@ -257,14 +262,8 @@ const Groups = () => {
       )}
 
       {/* Responsive Mobile Drawer Navigation Overlay */}
-      {isMobileMenuOpen && (
-        <div className="fixed inset-0 z-50 sm:hidden animate-fadeIn">
-          <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-xs" onClick={handleMobileClose} />
-          <div className="absolute left-0 top-0 h-full w-[75vw] max-w-xs bg-white/95 border-r border-slate-200/50 backdrop-blur-2xl shadow-2xl overflow-hidden animate-slideRight">
-            <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
-          </div>
-        </div>
-      )}
+      <Drawer open={isMobileMenuOpen} onClose={handleMobileClose} PaperProps={{ sx: { width: "min(340px, 88vw)" } }}><div className="flex justify-end p-2"><IconButton aria-label="Close groups" onClick={handleMobileClose}><X size={20} /></IconButton></div><GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} /></Drawer>
+      </div>
     </div>
   );
 };
@@ -274,7 +273,7 @@ const GroupsList = ({ myGroups = [], chatId }) => (
   <div className="h-full overflow-y-auto no-scrollbar py-4 px-2 space-y-1">
     <div className="px-3 mb-4 mt-14 sm:mt-2">
       <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-        My Clusters
+        My groups
       </h3>
     </div>
     {myGroups.length > 0 ? (
@@ -283,14 +282,14 @@ const GroupsList = ({ myGroups = [], chatId }) => (
       ))
     ) : (
       <div className="text-center py-8 text-xs font-semibold text-slate-400">
-        No channels established
+        No groups yet
       </div>
     )}
   </div>
 );
 
 /* --- SUB-COMPONENT: LIST INDIVIDUAL SELECTION ROW --- */
-const GroupListItem = memo(({ group, chatId }) => {
+const GroupListItem = memo(function GroupListItem({ group, chatId }) {
   const { name, avatar, _id } = group;
   const isActive = chatId === _id;
 
@@ -298,17 +297,13 @@ const GroupListItem = memo(({ group, chatId }) => {
     <Link
       to={`?group=${_id}`}
       onClick={(e) => isActive && e.preventDefault()}
-      className="block w-full transition-transform duration-150 active:scale-[0.99]"
+      className={`group-list-link ${isActive ? "is-active" : ""}`}
     >
       <div
-        className={`flex items-center gap-4 rounded-2xl p-3.5 border transition-all ${
-          isActive
-            ? "bg-white border-indigo-200/60 shadow-[0_10px_25px_-5px_rgba(79,70,229,0.06)]"
-            : "bg-transparent border-transparent hover:bg-white/50"
-        }`}
+        className="flex items-center gap-3 p-3"
       >
         <AvatarCard avatar={avatar} />
-        <div className={`font-bold text-sm truncate tracking-wide ${isActive ? "text-indigo-950" : "text-slate-700"}`}>
+        <div className="font-semibold text-sm truncate">
           {name}
         </div>
       </div>

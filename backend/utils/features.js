@@ -1,3 +1,4 @@
+import "dotenv/config";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
@@ -6,9 +7,9 @@ import { getBase64, getSockets } from "../lib/helper.js";
 
 const cookieOptions = {
   maxAge: 15 * 24 * 60 * 60 * 1000,
-  sameSite: "none",
+  sameSite: process.env.NODE_ENV?.toLowerCase() === "production" ? "none" : "lax",
   httpOnly: true,
-  secure: true,
+  secure: process.env.NODE_ENV?.toLowerCase() === "production",
 };
 
 const connectDB = (uri) => {
@@ -21,7 +22,7 @@ const connectDB = (uri) => {
 };
 
 const sendToken = (res, user, code, message) => {
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "15d" });
 
   return res.status(code).cookie("chattu-token", token, cookieOptions).json({
     success: true,
@@ -67,7 +68,10 @@ const uploadFilesToCloudinary = async (files = []) => {
 };
 
 const deletFilesFromCloudinary = async (public_ids) => {
-  // Delete files from cloudinary
+  for (let offset = 0; offset < public_ids.length; offset += 100) {
+    const batch = public_ids.slice(offset, offset + 100);
+    await Promise.all(["image", "video", "raw"].map((resource_type) => cloudinary.api.delete_resources(batch, { resource_type })));
+  }
 };
 
 export {

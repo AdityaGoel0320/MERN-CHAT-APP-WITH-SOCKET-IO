@@ -1,5 +1,4 @@
 import React, {
-  Fragment,
   useCallback,
   useEffect,
   useRef,
@@ -8,8 +7,9 @@ import React, {
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { useInfiniteScrollTop } from "6pp";
-import { FiPaperclip } from "react-icons/fi";
-import { IoSend } from "react-icons/io5";
+import { Paperclip, Send, Users, MessageCircle } from "lucide-react";
+import { Avatar, Tooltip } from "@mui/material";
+import toast from "react-hot-toast";
 
 import AppLayout from "../components/layout/AppLayout";
 import FileMenu from "../components/dialogs/FileMenu";
@@ -40,6 +40,8 @@ const Chat = ({ chatId, user }) => {
   const bottomRef = useRef(null);
 
   const [message, setMessage] = useState("");
+  const [isSending, setIsSending] = useState(false);
+  const [connected, setConnected] = useState(socket.connected);
   const [messages, setMessages] = useState([]);
   const [page, setPage] = useState(1);
   const [fileMenuAnchor, setFileMenuAnchor] = useState(null);
@@ -48,8 +50,8 @@ const Chat = ({ chatId, user }) => {
   const [userTyping, setUserTyping] = useState(false);
   const typingTimeout = useRef(null);
 
-  const chatDetails = useChatDetailsQuery({ chatId, skip: !chatId });
-  const oldMessagesChunk = useGetMessagesQuery({ chatId, page });
+  const chatDetails = useChatDetailsQuery({ chatId, populate: true }, { skip: !chatId });
+  const oldMessagesChunk = useGetMessagesQuery({ chatId, page }, { skip: !chatId });
 
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
     containerRef,
@@ -69,7 +71,7 @@ const Chat = ({ chatId, user }) => {
   const messageOnChange = (e) => {
     setMessage(e.target.value);
 
-    if (!IamTyping) {
+    if (!IamTyping && members && connected) {
       socket.emit(START_TYPING, { members, chatId });
       setIamTyping(true);
     }
@@ -89,14 +91,20 @@ const Chat = ({ chatId, user }) => {
 
   const submitHandler = (e) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !members || !connected || isSending) return;
 
-    socket.emit(NEW_MESSAGE, { chatId, members, message });
-    setMessage("");
+    setIsSending(true);
+    socket.timeout(10000).emit(NEW_MESSAGE, { chatId, message: message.trim() }, (error, result) => {
+      setIsSending(false);
+      if (error || !result?.success) toast.error(error ? "Delivery not confirmed. Check the conversation before retrying." : result?.message || "Could not send message");
+      else setMessage("");
+    });
+    clearTimeout(typingTimeout.current);
+    socket.emit(STOP_TYPING, { members, chatId });
+    setIamTyping(false);
   };
 
   useEffect(() => {
-    socket.emit(CHAT_JOINED, { userId: user._id, members });
     dispatch(removeNewMessagesAlert(chatId));
 
     return () => {
@@ -104,9 +112,23 @@ const Chat = ({ chatId, user }) => {
       setMessage("");
       setOldMessages([]);
       setPage(1);
-      socket.emit(CHAT_LEAVED, { userId: user._id, members });
+      setUserTyping(false);
+      setIamTyping(false);
+      clearTimeout(typingTimeout.current);
     };
-  }, [chatId]);
+  }, [chatId, dispatch, setOldMessages]);
+
+  useEffect(() => {
+    if (!members) return;
+    socket.emit(CHAT_JOINED, { chatId });
+    const joinOnReconnect = () => socket.emit(CHAT_JOINED, { chatId });
+    socket.on("connect", joinOnReconnect);
+    return () => {
+      socket.off("connect", joinOnReconnect);
+      socket.emit(STOP_TYPING, { chatId, members });
+      socket.emit(CHAT_LEAVED, { chatId });
+    };
+  }, [chatId, members, socket, user._id]);
 
   useEffect(() => {
     if (bottomRef.current)
@@ -114,8 +136,20 @@ const Chat = ({ chatId, user }) => {
   }, [messages]);
 
   useEffect(() => {
+    if (page === 1 && oldMessages.length) bottomRef.current?.scrollIntoView();
+  }, [oldMessages, page]);
+
+  useEffect(() => {
+    const onConnect = () => setConnected(true);
+    const onDisconnect = () => setConnected(false);
+    socket.on("connect", onConnect);
+    socket.on("disconnect", onDisconnect);
+    return () => { socket.off("connect", onConnect); socket.off("disconnect", onDisconnect); };
+  }, [socket]);
+
+  useEffect(() => {
     if (chatDetails.isError) return navigate("/");
-  }, [chatDetails.isError]);
+  }, [chatDetails.isError, navigate]);
 
   const newMessagesListener = useCallback(
     (data) => {
@@ -150,6 +184,7 @@ const Chat = ({ chatId, user }) => {
           _id: "admin-alert-node-id-00x",
           name: "Admin",
         },
+        _id: `alert-${Date.now()}-${Math.random()}`,
         chat: chatId,
         createdAt: new Date().toISOString(),
       };
@@ -174,7 +209,12 @@ const Chat = ({ chatId, user }) => {
   return chatDetails.isLoading ? (
     <ChatSkeleton />
   ) : (
-    <div className="flex flex-col h-[88vh] w-full relative overflow-hidden select-none px-2 sm:px-4">
+    <div className="chat-pane">
+      <header className="conversation-header">
+        <Avatar src={chatDetails.data?.chat?.groupChat ? undefined : members?.find((member) => member._id !== user._id)?.avatar} sx={{ bgcolor: "var(--accent-soft)", color: "var(--accent)", width: 40, height: 40 }}>{chatDetails.data?.chat?.groupChat ? <Users size={20} /> : <MessageCircle size={20} />}</Avatar>
+        <div className="min-w-0"><h1>{chatDetails.data?.chat?.groupChat ? chatDetails.data.chat.name : members?.find((member) => member._id !== user._id)?.name || chatDetails.data?.chat?.name}</h1><p>{userTyping ? "Typing..." : chatDetails.data?.chat?.groupChat ? `${members?.length || 0} members` : "Direct conversation"}</p></div>
+      </header>
+      {!connected && <div className="connection-notice" role="status">Reconnecting... Your draft is saved here.</div>}
       <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -183,15 +223,17 @@ const Chat = ({ chatId, user }) => {
       {/* --- ADDED 'flex flex-col' HERE TO ALLOW LEFT/RIGHT ALIGNMENT --- */}
       <div
         ref={containerRef}
-        className="flex-1 flex flex-col p-4 space-y-3 overflow-y-auto no-scrollbar w-full max-w-5xl mx-auto rounded-t-[2rem] bg-white/30 backdrop-blur-md border-x border-t border-white/40 shadow-inner"
+        className="message-feed"
       >
+        {oldMessagesChunk.isLoading && <ChatSkeleton />}
+        {!oldMessagesChunk.isLoading && !allMessages.length && <p className="feed-empty">No messages yet</p>}
         {allMessages.map((i) => (
           <MessageComponent key={i._id} message={i} user={user} />
         ))}
 
         {/* Constrained typing loader to stay on the left */}
         {userTyping && (
-          <div className="flex items-center gap-2 p-2 max-w-fit rounded-2xl bg-white/60 border border-white text-indigo-600 shadow-sm animate-pulse self-start">
+          <div className="typing-indicator" aria-label="Someone is typing">
             <TypingLoader />
           </div>
         )}
@@ -202,41 +244,46 @@ const Chat = ({ chatId, user }) => {
       {/* --- MODERN FLOATING GLASS INPUT BOX --- */}
       <form
         onSubmit={submitHandler}
-        className="h-20 w-full max-w-5xl mx-auto pb-4 pt-2 z-10"
+        className="message-composer"
       >
-        <div className="w-full h-full flex items-center px-4 gap-3 rounded-2xl bg-white/70 border border-white/80 backdrop-blur-xl shadow-[0_10px_30px_rgba(79,70,229,0.04)]">
+        <div className="composer-inner">
           
           {/* File Attachment Point */}
-          <button
+          <Tooltip title="Attach files"><span className="inline-flex"><button
             type="button"
+            aria-label="Attach files"
+            disabled={!members || !connected || isSending}
             onClick={handleFileOpen}
-            className="flex items-center justify-center h-10 w-10 rounded-xl bg-slate-100/80 hover:bg-indigo-50 border border-slate-200/40 text-slate-500 hover:text-indigo-600 active:scale-95 transition-all shrink-0"
+            className="icon-button"
           >
-            <FiPaperclip className="text-lg" />
-          </button>
+            <Paperclip size={20} />
+          </button></span></Tooltip>
 
           {/* Secure Messaging Input Field */}
           <input
             type="text"
+            aria-label="Message"
+            maxLength={4000}
+            disabled={isSending}
             placeholder="Write your message..."
             value={message}
             onChange={messageOnChange}
-            className="flex-1 h-11 px-4 rounded-xl bg-white/90 border border-slate-200/60 text-slate-800 placeholder-slate-400 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-none"
+            className="composer-input"
           />
 
           {/* Send Trigger Button */}
-          <button
+          <Tooltip title="Send message"><span className="inline-flex"><button
             type="submit"
-            disabled={!message.trim()}
-            className="flex items-center justify-center h-11 px-5 rounded-xl bg-indigo-600 disabled:bg-indigo-300 text-white font-black hover:bg-indigo-500 active:scale-95 shadow-md hover:shadow-indigo-500/10 transition-all shrink-0 gap-2 text-xs uppercase tracking-wider"
+            aria-label="Send message"
+            disabled={!message.trim() || !members || !connected || isSending}
+            className="send-button"
           >
-            <span>Send</span>
-            <IoSend className="text-xs transform rotate-[-15deg]" />
-          </button>
+            <Send size={19} />
+          </button></span></Tooltip>
         </div>
       </form>
 
-      <FileMenu anchorE1={fileMenuAnchor} chatId={chatId} />
+      <FileMenu anchorEl={fileMenuAnchor} chatId={chatId} />
     </div>
   );
 };

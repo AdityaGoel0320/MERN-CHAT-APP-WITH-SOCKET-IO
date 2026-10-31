@@ -8,9 +8,8 @@ import {
   Message as MessageIcon,
 } from "@mui/icons-material";
 import {
-  Box,
+  Button,
   Drawer,
-  Grid,
   IconButton,
   Stack,
   Typography,
@@ -18,17 +17,19 @@ import {
 } from "@mui/material";
 import React, { useState } from "react";
 import { Link as LinkComponent, Navigate, useLocation } from "react-router-dom";
-import { grayColor, matBlack } from "../../constants/color";
 import { useDispatch, useSelector } from "react-redux";
 import { adminLogout } from "../../redux/thunks/admin";
+import ThemeToggle from "../shared/ThemeToggle";
+import { MessageCircle } from "lucide-react";
 
 const Link = styled(LinkComponent)`
   text-decoration: none;
-  border-radius: 2rem;
-  padding: 1rem 2rem;
-  color: black;
+  border-radius: 6px;
+  padding: 12px 16px;
+  color: var(--muted);
   &:hover {
-    color: rgba(0, 0, 0, 0.54);
+    color: var(--ink);
+    background: var(--surface-soft);
   }
 `;
 
@@ -64,9 +65,9 @@ const Sidebar = ({ w = "100%" }) => {
   };
 
   return (
-    <Stack width={w} direction={"column"} p={"3rem"} spacing={"3rem"}>
-      <Typography variant="h5" textTransform={"uppercase"}>
-        ChatBuddy
+    <Stack width={w} direction={"column"} p={2} spacing={3}>
+      <Typography variant="overline" color="text.secondary" sx={{ pl: 2 }}>
+        Administration
       </Typography>
 
       <Stack spacing={"1rem"}>
@@ -76,9 +77,9 @@ const Sidebar = ({ w = "100%" }) => {
             to={tab.path}
             sx={
               location.pathname === tab.path && {
-                bgcolor: matBlack,
-                color: "white",
-                ":hover": { color: "white" },
+                bgcolor: "var(--accent-soft)",
+                color: "var(--accent)",
+                ":hover": { color: "var(--accent)" },
               }
             }
           >
@@ -90,13 +91,13 @@ const Sidebar = ({ w = "100%" }) => {
           </Link>
         ))}
 
-        <Link onClick={logoutHandler}>
+        <Button onClick={logoutHandler} sx={{ justifyContent: "flex-start", p: "12px 16px", color: "error.main" }}>
           <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
             <ExitToAppIcon />
 
             <Typography>Logout</Typography>
           </Stack>
-        </Link>
+        </Button>
       </Stack>
     </Stack>
   );
@@ -114,40 +115,22 @@ const AdminLayout = ({ children }) => {
   if (!isAdmin) return <Navigate to="/admin" />;
 
   return (
-    <Grid container minHeight={"100vh"}>
-      <Box
-        sx={{
-          display: { xs: "block", md: "none" },
-          position: "fixed",
-          right: "1rem",
-          top: "1rem",
-        }}
-      >
-        <IconButton onClick={handleMobile}>
-          {isMobile ? <CloseIcon /> : <MenuIcon />}
-        </IconButton>
-      </Box>
-
-      <Grid item md={4} lg={3} sx={{ display: { xs: "none", md: "block" } }}>
+    <div className="app-shell">
+      <header className="app-header"><LinkComponent to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</LinkComponent><div className="header-actions"><ThemeToggle /><IconButton aria-label="Open admin navigation" onClick={handleMobile} sx={{ display: { md: "none" } }}><MenuIcon /></IconButton></div></header>
+      <div className="admin-workspace">
+      <aside className="admin-sidebar">
         <Sidebar />
-      </Grid>
-
-      <Grid
-        item
-        xs={12}
-        md={8}
-        lg={9}
-        sx={{
-          bgcolor: grayColor,
-        }}
-      >
+      </aside>
+      <main className="admin-main">
         {children}
-      </Grid>
+      </main>
 
-      <Drawer open={isMobile} onClose={handleClose}>
-        <Sidebar w="50vw" />
+      <Drawer open={isMobile} onClose={handleClose} PaperProps={{ sx: { width: "min(300px, 88vw)" } }}>
+        <IconButton aria-label="Close admin navigation" onClick={handleClose} sx={{ alignSelf: "flex-end", m: 1 }}><CloseIcon /></IconButton>
+        <Sidebar />
       </Drawer>
-    </Grid>
+      </div>
+    </div>
   );
 };
 

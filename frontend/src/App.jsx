@@ -25,7 +25,7 @@ const MessagesManagement = lazy(() =>
   import("./pages/admin/MessageManagement")
 );
 
-import UserProfile from "./components/specific/UserProfile";
+const UserProfile = lazy(() => import("./components/specific/UserProfile"));
 
 
 const App = () => {
@@ -35,9 +35,9 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get(`${server}/api/v1/user/me`, { withCredentials: true })
+      .get(`${server}/api/v1/user/me`, { withCredentials: true, timeout: 10000 })
       .then(({ data }) => dispatch(userExists(data.user)))
-      .catch((err) => dispatch(userNotExists()));
+      .catch(() => dispatch(userNotExists()));
   }, [dispatch]);
 
   return loader ? (
@@ -48,9 +48,9 @@ const App = () => {
         <Routes>
           <Route
             element={
-              <SocketProvider>
+              user ? <SocketProvider>
                 <ProtectRoute user={user} />
-              </SocketProvider>
+              </SocketProvider> : <ProtectRoute user={user} />
             }
           >
             <Route path="/" element={<Home />} />
@@ -78,7 +78,7 @@ const App = () => {
         </Routes>
       </Suspense>
 
-      <Toaster position="bottom-center" />
+      <Toaster position="bottom-center" toastOptions={{ style: { background: "var(--surface)", color: "var(--ink)", border: "1px solid var(--line)", fontSize: "13px" } }} />
     </BrowserRouter>
   );
 };

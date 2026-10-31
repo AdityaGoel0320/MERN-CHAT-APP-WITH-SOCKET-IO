@@ -1,16 +1,12 @@
 import { useFetchData } from "6pp";
 import {
-  AdminPanelSettings as AdminPanelSettingsIcon,
   Group as GroupIcon,
   Message as MessageIcon,
-  Notifications as NotificationsIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
 import {
-  Box,
   Container,
   Paper,
-  Skeleton,
   Stack,
   Typography,
 } from "@mui/material";
@@ -18,20 +14,12 @@ import moment from "moment";
 import React from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { DoughnutChart, LineChart } from "../../components/specific/Charts";
-import {
-  CurveButton,
-  SearchField,
-} from "../../components/styles/StyledComponents";
-import { matBlack } from "../../constants/color";
 import { server } from "../../constants/config";
 import { useErrors } from "../../hooks/hook";
 import ChatSkeleton from "../../components/shared/ChatSkeleton";
 
 const Dashboard = () => {
-  const { loading, data, error } = useFetchData(
-    `${server}/api/v1/admin/stats`,
-    "dashboard-stats"
-  );
+  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/stats`, key: "dashboard-stats", credentials: "include", dependencyProps: [] });
 
   const { stats } = data || {};
 
@@ -43,31 +31,7 @@ const Dashboard = () => {
   ]);
 
   const Appbar = (
-    <Paper
-      elevation={3}
-      sx={{ padding: "2rem", margin: "2rem 0", borderRadius: "1rem" }}
-    >
-      <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
-        <AdminPanelSettingsIcon sx={{ fontSize: "3rem" }} />
-
-        <SearchField placeholder="Search..." />
-
-        <CurveButton>Search</CurveButton>
-        <Box flexGrow={1} />
-        <Typography
-          display={{
-            xs: "none",
-            lg: "block",
-          }}
-          color={"rgba(0,0,0,0.7)"}
-          textAlign={"center"}
-        >
-          {moment().format("dddd, D MMMM YYYY")}
-        </Typography>
-
-        <NotificationsIcon />
-      </Stack>
-    </Paper>
+    <header className="admin-section-header"><div><p className="eyebrow">OVERVIEW</p><h1>Workspace overview</h1></div><Typography color="text.secondary" sx={{ fontSize: 12 }}>{moment().format("dddd, D MMMM YYYY")}</Typography></header>
   );
 
   const Widgets = (
@@ -78,7 +42,7 @@ const Dashboard = () => {
       }}
       spacing="2rem"
       justifyContent="space-between"
-      alignItems={"center"}
+      alignItems={"stretch"}
       margin={"2rem 0"}
     >
       <Widget title={"Users"} value={stats?.usersCount} Icon={<PersonIcon />} />
@@ -100,7 +64,7 @@ const Dashboard = () => {
       {loading ? (
         <ChatSkeleton/>
       ) : (
-        <Container component={"main"}>
+        <Container component={"section"}>
           {Appbar}
 
           <Stack
@@ -114,19 +78,20 @@ const Dashboard = () => {
               xs: "center",
               lg: "stretch",
             }}
-            sx={{ gap: "2rem" }}
+            sx={{ gap: "2rem", width: "100%", minWidth: 0 }}
           >
             <Paper
               elevation={3}
               sx={{
-                padding: "2rem 3.5rem",
-                borderRadius: "1rem",
+                padding: { xs: "1.25rem", md: "2rem" },
+                borderRadius: "8px",
                 width: "100%",
                 maxWidth: "45rem",
+                minWidth: 0,
               }}
             >
-              <Typography margin={"2rem 0"} variant="h4">
-                Last Messages
+              <Typography margin={"0 0 1.5rem"} variant="h6">
+                Message activity
               </Typography>
 
               <LineChart value={stats?.messagesChart || []} />
@@ -136,13 +101,14 @@ const Dashboard = () => {
               elevation={3}
               sx={{
                 padding: "1rem ",
-                borderRadius: "1rem",
+                borderRadius: "8px",
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
                 width: { xs: "100%", sm: "50%" },
                 position: "relative",
                 maxWidth: "25rem",
+                minWidth: 0,
               }}
             >
               <DoughnutChart
@@ -180,25 +146,24 @@ const Widget = ({ title, value, Icon }) => (
     elevation={3}
     sx={{
       padding: "2rem",
-      margin: "2rem 0",
-      borderRadius: "1.5rem",
-      width: "20rem",
+      borderRadius: "8px",
+      width: "100%",
+      flex: 1,
+      minWidth: 0,
     }}
   >
     <Stack alignItems={"center"} spacing={"1rem"}>
       <Typography
         sx={{
-          color: "rgba(0,0,0,0.7)",
-          borderRadius: "50%",
-          border: `5px solid ${matBlack}`,
-          width: "5rem",
-          height: "5rem",
+          color: "text.primary",
+          fontSize: 32,
+          fontWeight: 700,
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        {value}
+        {value ?? 0}
       </Typography>
       <Stack direction={"row"} spacing={"1rem"} alignItems={"center"}>
         {Icon}

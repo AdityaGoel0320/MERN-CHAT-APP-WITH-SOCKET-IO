@@ -8,6 +8,8 @@ import ChatSkeleton from "../shared/ChatSkeleton";
 import { useAsyncMutation, useErrors } from "../../hooks/hook";
 import { useAvailableFriendsQuery, useNewGroupMutation } from "../../redux/api/api";
 import { setIsNewGroup } from "../../redux/reducers/misc";
+import { Dialog } from "@mui/material";
+import { LoaderCircle, Users } from "lucide-react";
 
 const NewGroup = () => {
   const { isNewGroup } = useSelector((state) => state.misc);
@@ -30,16 +32,16 @@ const NewGroup = () => {
     );
   };
 
-  const submitHandler = () => {
+  const submitHandler = async () => {
     if (!groupName.value.trim()) return toast.error("Group name is required");
     if (selectedMembers.length < 2) return toast.error("Please select at least 2 members");
 
-    newGroup("Creating New Group...", {
-      name: groupName.value,
+    const result = await newGroup("Creating New Group...", {
+      name: groupName.value.trim(),
       members: selectedMembers,
     });
 
-    closeHandler();
+    if (result) closeHandler();
   };
 
   const closeHandler = () => {
@@ -50,14 +52,11 @@ const NewGroup = () => {
 
   return (
     /* Modal Layer Blur Backdrop Mask */
-    <div 
-      onClick={closeHandler}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm animate-fadeIn"
-    >
+    <Dialog open={isNewGroup} onClose={closeHandler} fullWidth maxWidth="xs" aria-labelledby="new-group-title" PaperProps={{ className: "dialog-panel" }}>
       {/* --- MAIN GLASS CARD CONTROLLER --- */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md max-h-[80vh] flex flex-col p-6 sm:p-8 rounded-[2.5rem] bg-white/80 border border-white/60 backdrop-blur-2xl shadow-[0_25px_60px_-15px_rgba(79,70,229,0.12)] text-slate-700 overflow-hidden transform scale-100 transition-all duration-300"
+        className="dialog-content"
       >
         <style>{`
           .no-scrollbar::-webkit-scrollbar { display: none !important; }
@@ -66,19 +65,22 @@ const NewGroup = () => {
 
         {/* Header Title Section */}
         <div className="text-center mb-5">
-          <h2 className="text-xl font-black uppercase tracking-wider bg-gradient-to-r from-indigo-700 to-violet-600 bg-clip-text text-transparent">
-            Create Channel
+          <h2 id="new-group-title">
+            New group
           </h2>
           <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-            Initialize a multi-node conversation cluster
+            {selectedMembers.length} members selected
           </p>
         </div>
 
         {/* Input Text Form Deck */}
         <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
           <div className="flex flex-col gap-1 shrink-0">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Channel Title</label>
+            <label htmlFor="group-name">Group name</label>
             <input
+              id="group-name"
+              autoFocus
+              maxLength={80}
               type="text"
               value={groupName.value}
               onChange={groupName.changeHandler}
@@ -90,7 +92,7 @@ const NewGroup = () => {
           {/* Members Subsection Header Label */}
           <div className="flex items-center justify-between shrink-0 pt-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Select Associates
+              Members
             </span>
             <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md border border-indigo-100/40">
               {selectedMembers.length} Selected
@@ -120,9 +122,9 @@ const NewGroup = () => {
               ))
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center opacity-60">
-                <i className="fas fa-user-friends text-slate-300 text-xl mb-1" />
+                <Users size={24} />
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  No network friends available
+                  No friends available
                 </p>
               </div>
             )}
@@ -144,13 +146,13 @@ const NewGroup = () => {
             disabled={isLoadingNewGroup}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white font-black text-xs uppercase tracking-widest shadow-md hover:shadow-indigo-500/10 transition-all flex items-center justify-center gap-2"
           >
-            {isLoadingNewGroup && <i className="fas fa-spinner animate-spin" />}
-            Assemble
+            {isLoadingNewGroup && <LoaderCircle size={18} className="animate-spin" />}
+            Create group
           </button>
         </div>
 
       </div>
-    </div>
+    </Dialog>
   );
 };
 
