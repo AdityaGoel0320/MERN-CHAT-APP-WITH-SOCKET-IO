@@ -1,26 +1,94 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { useFileHandler, useInputValidation } from "6pp";
+import { useInputValidation } from "6pp";
+import Cropper from "react-easy-crop";
+import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
 import { server } from "../constants/config";
 import { userExists } from "../redux/reducers/auth";
 import { usernameValidator } from "../utils/validators";
-import { ArrowRight, Camera, Eye, EyeOff, LoaderCircle, MessageCircle } from "lucide-react";
+import { ArrowRight, Camera, Check, Eye, EyeOff, LoaderCircle, MessageCircle, X } from "lucide-react";
 import ThemeToggle from "../components/shared/ThemeToggle";
+
+const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
+
+const cropAvatar = async (source, area) => {
+  const image = new Image();
+  image.src = source;
+  await image.decode();
+  const canvas = document.createElement("canvas");
+  canvas.width = 512;
+  canvas.height = 512;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Image cropping is unavailable in this browser");
+  context.drawImage(image, area.x, area.y, area.width, area.height, 0, 0, 512, 512);
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) throw new Error("Could not crop this image");
+  return new File([blob], "avatar.png", { type: "image/png" });
+};
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [signUpStep, setSignUpStep] = useState(1); // 1: Profile Info, 2: Account Security
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [avatar, setAvatar] = useState({ file: null, preview: "", error: "" });
+  const [cropSource, setCropSource] = useState("");
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState(null);
+  const [isCropping, setIsCropping] = useState(false);
+  const [cropError, setCropError] = useState("");
 
   // 6pp validation custom hooks
   const name = useInputValidation("");
   const bio = useInputValidation("");
   const username = useInputValidation("", usernameValidator);
   const password = useInputValidation("");
-  const avatar = useFileHandler("single", 5);
+
+  useEffect(() => () => {
+    if (cropSource) URL.revokeObjectURL(cropSource);
+  }, [cropSource]);
+
+  useEffect(() => () => {
+    if (avatar.preview) URL.revokeObjectURL(avatar.preview);
+  }, [avatar.preview]);
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    setAvatar((current) => ({ ...current, error: "" }));
+    if (!file.type.startsWith("image/") || file.size > MAX_AVATAR_SIZE) {
+      setAvatar((current) => ({
+        ...current,
+        error: file.size > MAX_AVATAR_SIZE ? "File size too large. Choose an image under 5 MB." : "Choose an image file.",
+      }));
+      return;
+    }
+    setCrop({ x: 0, y: 0 });
+    setZoom(1);
+    setCroppedArea(null);
+    setCropError("");
+    setCropSource(URL.createObjectURL(file));
+  };
+
+  const saveAvatarCrop = async () => {
+    if (!croppedArea || isCropping) return;
+    setIsCropping(true);
+    setCropError("");
+    try {
+      const file = await cropAvatar(cropSource, croppedArea);
+      if (file.size > MAX_AVATAR_SIZE) throw new Error("Cropped image must be under 5 MB");
+      setAvatar({ file, preview: URL.createObjectURL(file), error: "" });
+      setCropSource("");
+    } catch (error) {
+      setCropError(error.message || "Could not crop this image");
+    } finally {
+      setIsCropping(false);
+    }
+  };
 
   const dispatch = useDispatch();
 
@@ -176,17 +244,19 @@ const Login = () => {
                   <div className="flex flex-col items-center group relative my-1">
                     <div className="avatar-upload">
                       {avatar.preview ? <img src={avatar.preview} alt="Profile preview" /> : <span className="avatar-placeholder"><Camera size={24} /></span>}
-                      <label htmlFor="signup-avatar">Profile photo
+                      <label htmlFor="signup-avatar"><span>Profile photo</span>
                         <input
                           id="signup-avatar"
                           type="file"
                           accept="image/*"
-                          onChange={avatar.changeHandler}
+                          onChange={handleAvatarChange}
+                          aria-invalid={Boolean(avatar.error)}
+                          aria-describedby={avatar.error ? "avatar-error" : undefined}
                         />
                       </label>
                     </div>
                     {avatar.error && (
-                      <span className="text-red-500 text-[10px] mt-1 font-semibold">{avatar.error}</span>
+                      <span id="avatar-error" role="alert" className="text-red-500 text-xs mt-1 font-semibold">{avatar.error}</span>
                     )}
                   </div>
 
@@ -303,6 +373,40 @@ const Login = () => {
       </section>
       <aside className="auth-visual" aria-label="ChatBuddy workspace"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85" alt="A team working together around a table" /><div className="auth-visual-caption"><span>CHATBUDDY</span><h2>A place for your people.</h2></div></aside>
       </main>
+      <Dialog
+        open={Boolean(cropSource)}
+        onClose={() => { if (!isCropping) setCropSource(""); }}
+        fullWidth
+        maxWidth="sm"
+        aria-labelledby="avatar-crop-title"
+        PaperProps={{ className: "dialog-panel" }}
+      >
+        <DialogTitle id="avatar-crop-title">Crop profile photo</DialogTitle>
+        <DialogContent>
+          <div className="avatar-crop-stage">
+            {cropSource && <Cropper
+              image={cropSource}
+              crop={crop}
+              zoom={zoom}
+              aspect={1}
+              cropShape="round"
+              onCropChange={setCrop}
+              onZoomChange={setZoom}
+              onCropComplete={(_, area) => setCroppedArea(area)}
+              onMediaLoaded={() => setCropError("")}
+              mediaProps={{ onError: () => { setCroppedArea(null); setCropError("Could not open this image. Choose another photo."); } }}
+            />}
+          </div>
+          <label className="avatar-crop-zoom" htmlFor="avatar-zoom"><span>Zoom</span>
+            <input id="avatar-zoom" type="range" min="1" max="3" step="0.05" value={zoom} disabled={isCropping} onChange={(event) => setZoom(Number(event.target.value))} />
+          </label>
+          {cropError && <p role="alert" className="text-red-500 text-sm">{cropError}</p>}
+        </DialogContent>
+        <DialogActions>
+          <button type="button" className="text-action inline-flex items-center gap-2 px-3 py-2" disabled={isCropping} onClick={() => setCropSource("")}><X size={18} />Cancel</button>
+          <button type="button" className="primary-button" disabled={isCropping || !croppedArea || Boolean(cropError)} onClick={saveAvatarCrop}>{isCropping ? <LoaderCircle size={18} className="animate-spin" /> : <Check size={18} />}{isCropping ? "Saving..." : "Save photo"}</button>
+        </DialogActions>
+      </Dialog>
       <footer className="auth-footer">ChatBuddy &copy; {new Date().getFullYear()}</footer>
     </div>
   );

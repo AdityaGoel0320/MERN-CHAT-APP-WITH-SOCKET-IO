@@ -14,6 +14,8 @@ import { Chat } from "./models/chat.js";
 import { registerChatHandlers } from "./lib/socketHandlers.js";
 import { corsOptions } from "./constants/config.js";
 import { socketAuthenticator } from "./middlewares/auth.js";
+import dns from "dns";
+dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
 import userRoute from "./routes/user.js";
 import chatRoute from "./routes/chat.js";

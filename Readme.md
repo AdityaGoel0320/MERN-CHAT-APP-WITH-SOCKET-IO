@@ -81,6 +81,17 @@ To run ChatBuddy locally, follow these steps:
 
 7. Access ChatBuddy in your browser at `http://localhost:5173`.
 
+### Local CORS configuration
+
+Set backend `CLIENT_URL` to the exact frontend origin shown in your browser. Multiple
+origins can be comma-separated, for example
+`CLIENT_URL=http://localhost:5173,http://localhost:5175`. Do not use `*`: authentication
+requests send cookies, and browsers reject wildcard origins with credentials.
+
+Keep frontend `VITE_SERVER` aligned with backend `PORT` (for example,
+`VITE_SERVER=http://localhost:3333` with `PORT=3333`). Restart the backend and the Vite
+dev server after changing their environment files.
+
 ## Usage
 
 Once the application is up and running, users can sign up, log in, and start messaging with other users in real-time. The admin panel allows administrators to manage users and content efficiently.

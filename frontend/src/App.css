@@ -145,6 +145,9 @@ h1, h2, h3 { font-family: "Manrope", sans-serif; }
 .avatar-upload label { min-width: 0; }
 .avatar-upload input { display: block; margin-top: 6px; max-width: 100%; font-size: 11px; color: var(--muted); }
 .avatar-upload input::file-selector-button { background: var(--surface-soft); color: var(--ink); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; margin-right: 8px; cursor: pointer; }
+.avatar-crop-stage { position: relative; width: 100%; height: min(360px, 45dvh); background: #18252b; }
+.avatar-crop-zoom { display: flex; align-items: center; gap: 16px; margin-top: 20px; color: var(--ink); font-size: 14px; }
+.avatar-crop-zoom input { flex: 1; min-width: 0; accent-color: var(--sent); }
 .auth-visual { align-self: stretch; min-height: 540px; position: relative; overflow: hidden; border-radius: 8px; background: var(--surface-soft); }
 .auth-visual img { width: 100%; height: 100%; position: absolute; inset: 0; object-fit: cover; }
 .auth-visual-caption { position: absolute; left: 0; right: 0; bottom: 0; padding: 80px 36px 36px; color: white; background: linear-gradient(transparent, rgba(0, 0, 0, .75)); }

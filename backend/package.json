@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node app.js",
     "test": "node --test lib/socketHandlers.test.js",
-    "code": "nodemon app.js -e hbs,js,jsx,.env,html"
+    "backend": "nodemon app.js -e hbs,js,jsx,.env,html"
   },
   "keywords": [],
   "author": "",
@@ -29,5 +29,8 @@
   "devDependencies": {
     "@faker-js/faker": "^8.4.1",
     "nodemon": "^3.1.0"
+  },
+  "allowScripts": {
+    "bcrypt@5.1.1": true
   }
 }
