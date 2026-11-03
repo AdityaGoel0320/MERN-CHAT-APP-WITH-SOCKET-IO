@@ -14,6 +14,20 @@ import ThemeToggle from "../components/shared/ThemeToggle";
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
 
+const getAuthenticatedUser = async () => {
+  try {
+    const { data } = await axios.get(`${server}/api/v1/user/me`, {
+      withCredentials: true,
+    });
+    return data.user;
+  } catch (error) {
+    if (error?.response?.status === 401) {
+      throw new Error("Your browser could not retain the login session. Allow cookies for this site and try again.");
+    }
+    throw error;
+  }
+};
+
 const cropAvatar = async (source, area) => {
   const image = new Image();
   image.src = source;
@@ -130,10 +144,11 @@ const Login = () => {
           headers: { "Content-Type": "application/json" },
         }
       );
-      dispatch(userExists(data.user));
+      const authenticatedUser = await getAuthenticatedUser();
+      dispatch(userExists(authenticatedUser));
       toast.success(data.message, { id: toastId });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something Went Wrong", {
+      toast.error(error?.response?.data?.message || error.message || "Something Went Wrong", {
         id: toastId,
       });
     } finally {
@@ -163,10 +178,11 @@ const Login = () => {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      dispatch(userExists(data.user));
+      const authenticatedUser = await getAuthenticatedUser();
+      dispatch(userExists(authenticatedUser));
       toast.success(data.message, { id: toastId });
     } catch (error) {
-      toast.error(error?.response?.data?.message || "Something Went Wrong", {
+      toast.error(error?.response?.data?.message || error.message || "Something Went Wrong", {
         id: toastId,
       });
     } finally {

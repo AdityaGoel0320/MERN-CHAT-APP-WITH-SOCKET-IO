@@ -4,12 +4,17 @@ import jwt from "jsonwebtoken";
 import { v4 as uuid } from "uuid";
 import { v2 as cloudinary } from "cloudinary";
 import { getBase64, getSockets } from "../lib/helper.js";
+import { frontendUrl } from "../backendConstant.js";
+
+const useSecureCookies = process.env.NODE_ENV?.trim().toLowerCase() === "production"
+  || new URL(frontendUrl).protocol === "https:";
 
 const cookieOptions = {
   maxAge: 15 * 24 * 60 * 60 * 1000,
-  sameSite: process.env.NODE_ENV?.toLowerCase() === "production" ? "none" : "lax",
+  sameSite: useSecureCookies ? "none" : "lax",
   httpOnly: true,
-  secure: process.env.NODE_ENV?.toLowerCase() === "production",
+  secure: useSecureCookies,
+  partitioned: useSecureCookies,
 };
 
 const connectDB = (uri) => {
