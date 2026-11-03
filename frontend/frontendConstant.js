@@ -1,3 +1,0 @@
-const backendUrl = ""
-
-export {backendUrl}
