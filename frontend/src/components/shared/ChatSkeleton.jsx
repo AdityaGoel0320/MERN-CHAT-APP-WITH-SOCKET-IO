@@ -1,85 +1,24 @@
 import React from "react";
+import { MessageCircle, Server } from "lucide-react";
 
 const ChatSkeleton = () => {
   return (
-    <div className="h-full w-full flex flex-col items-center justify-center bg-white">
-
-      {/* Animated Logo */}
-      <div className="relative">
-        <div className="w-24 h-24 rounded-full border-4 border-gray-200"></div>
-
-        <div
-          className="
-          absolute inset-0
-          rounded-full
-          border-4
-          border-transparent
-          border-t-black
-          animate-spin
-          "
-        />
+    <output className="server-loader" aria-label="Connecting to ChatBuddy">
+      <div className="server-loader-content">
+        <div className="server-loader-art" aria-hidden="true">
+          <div className="server-loader-mark"><MessageCircle size={26} /></div>
+          <div className="server-loader-messages">
+            <div className="server-loader-message"><span /><span /></div>
+            <div className="server-loader-message is-reply"><span /><span /></div>
+            <div className="server-loader-message"><span /><span /></div>
+          </div>
+        </div>
+        <div className="server-loader-title"><span className="server-loader-dots" aria-hidden="true"><span /><span /><span /></span><h2>Getting connected</h2></div>
+        <p className="server-loader-description">Just a moment while ChatBuddy wakes up.</p>
+        <div className="server-loader-track" aria-hidden="true"><span /></div>
+        <div className="server-loader-notice"><Server size={15} aria-hidden="true" /><p>Our free server sleeps between visits. The first connection may take <strong>30&ndash;60 seconds.</strong></p></div>
       </div>
-
-      {/* Title */}
-      <h2 className="mt-8 text-3xl font-bold text-gray-900">
-        Connecting...
-      </h2>
-
-      {/* Typing Dots */}
-      <div className="flex gap-2 mt-5">
-        <div className="w-3 h-3 rounded-full bg-black animate-bounce"></div>
-
-        <div
-          className="w-3 h-3 rounded-full bg-black animate-bounce"
-          style={{ animationDelay: "0.15s" }}
-        ></div>
-
-        <div
-          className="w-3 h-3 rounded-full bg-black animate-bounce"
-          style={{ animationDelay: "0.3s" }}
-        ></div>
-      </div>
-
-      {/* Main Message */}
-      <p className="mt-8 text-center text-gray-700 max-w-md px-6">
-        Waking up the server and fetching your chats...
-      </p>
-
-      {/* Secondary Message */}
-      <p className="mt-3 text-center text-sm text-gray-500 max-w-lg px-6">
-        This app is hosted on a free server. The first request may take
-        <span className="font-semibold"> 30-60 seconds </span>
-        due to cold starts.
-      </p>
-
-      {/* Progress Bar */}
-      <div className="mt-8 w-72 h-2 bg-gray-200 rounded-full overflow-hidden">
-        <div
-          className="
-          h-full
-          w-1/2
-          bg-black
-          rounded-full
-          animate-[loading_2s_ease-in-out_infinite]
-          "
-        />
-      </div>
-
-      {/* Custom Animation */}
-      <style>
-        {`
-          @keyframes loading {
-            0% {
-              transform: translateX(-100%);
-            }
-
-            100% {
-              transform: translateX(250%);
-            }
-          }
-        `}
-      </style>
-    </div>
+    </output>
   );
 };
 
