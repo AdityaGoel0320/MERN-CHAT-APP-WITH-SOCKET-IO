@@ -87,7 +87,7 @@ const UserProfile = () => {
         <div><dt><CalendarDays size={18} />Joined</dt><dd>{moment(user.createdAt).format("MMMM D, YYYY")}</dd></div>
         <div><dt>Bio</dt><dd>{user.bio || "No bio yet"}</dd></div>
       </dl>
-      <NavLink to="/admin" className="admin-link"><Shield size={17} />Admin workspace</NavLink>
+      {/* <NavLink to="/admin" className="admin-link"><Shield size={17} />Admin workspace</NavLink> */}
     </section>
 
   );

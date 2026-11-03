@@ -21,6 +21,10 @@ const newUser = TryCatch(async (req, res, next) => {
 
   if (!file) return next(new ErrorHandler("Please Upload Avatar"));
 
+  const usernameExists = await User.exists({ username });
+  if (usernameExists)
+    return next(new ErrorHandler("Username is already taken. Please choose another one.", 409));
+
   const result = await uploadFilesToCloudinary([file]);
 
   const avatar = {
@@ -87,7 +91,7 @@ const searchUser = TryCatch(async (req, res) => {
 
   // Finding all users except me and my friends
   const allUsersExceptMeAndFriends = await User.find({
-    _id: { $nin: allUsersFromMyChats },
+    _id: { $nin: [req.user, ...allUsersFromMyChats] },
     name: { $regex: name, $options: "i" },
   });
 

@@ -1,10 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { server } from "../../constants/config";
+import { server } from "../../constants/frontendConstant.js";
 
 const api = createApi({
   reducerPath: "api",
   baseQuery: fetchBaseQuery({ baseUrl: `${server}/api/v1/` }),
-  tagTypes: ["Chat", "User", "Message"],
+  tagTypes: ["Chat", "User", "Message", "Notification"],
 
   endpoints: (builder) => ({
     myChats: builder.query({
@@ -39,6 +39,7 @@ const api = createApi({
         url: `user/notifications`,
         credentials: "include",
       }),
+      providesTags: ["Notification"],
       keepUnusedDataFor: 0,
     }),
 
@@ -49,7 +50,7 @@ const api = createApi({
         credentials: "include",
         body: data,
       }),
-      invalidatesTags: ["Chat"],
+      invalidatesTags: ["Chat", "Notification"],
     }),
 
     chatDetails: builder.query({

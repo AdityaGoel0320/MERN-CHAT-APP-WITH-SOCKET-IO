@@ -4,11 +4,12 @@ import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { useInputValidation } from "6pp";
 import Cropper from "react-easy-crop";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
-import { server } from "../constants/config";
+import { server } from "../constants/frontendConstant";
 import { userExists } from "../redux/reducers/auth";
 import { usernameValidator } from "../utils/validators";
-import { ArrowRight, Camera, Check, Eye, EyeOff, LoaderCircle, MessageCircle, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Camera, Check, CheckCheck, Eye, EyeOff, LoaderCircle, MessageCircle, Plus, Send, X } from "lucide-react";
 import ThemeToggle from "../components/shared/ThemeToggle";
 
 const MAX_AVATAR_SIZE = 5 * 1024 * 1024;
@@ -29,6 +30,7 @@ const cropAvatar = async (source, area) => {
 };
 
 const Login = () => {
+  const reduceMotion = useReducedMotion();
   const [isLogin, setIsLogin] = useState(true);
   const [signUpStep, setSignUpStep] = useState(1); // 1: Profile Info, 2: Account Security
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +48,8 @@ const Login = () => {
   const bio = useInputValidation("");
   const username = useInputValidation("", usernameValidator);
   const password = useInputValidation("");
+  const signupSubtitle = signUpStep === 1 ? "First, a little about you." : "Make it yours. You're almost there.";
+  const subtitle = isLogin ? "Good to see you. Let's pick up where you left off." : signupSubtitle;
 
   useEffect(() => () => {
     if (cropSource) URL.revokeObjectURL(cropSource);
@@ -94,6 +98,7 @@ const Login = () => {
 
   const toggleLogin = () => {
     setIsLogin((prev) => !prev);
+    setShowPassword(false);
     setSignUpStep(1); // Reset step on toggle
   };
 
@@ -173,25 +178,39 @@ const Login = () => {
     <div className="auth-page">
       <header className="auth-header"><a href="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</a><ThemeToggle /></header>
       <main className="auth-main">
-
-      {/* --- RESPONSIVE GLASS CONTAINER --- */}
+      <aside className="auth-visual" aria-label="ChatBuddy conversation preview">
+        <div className="auth-visual-heading"><span className="auth-live"><span /> A little closer, wherever you are</span><h2>ChatBuddy<span>Your people.<br />One happy place.</span></h2></div>
+        <div className="auth-conversation" aria-hidden="true">
+          <div className="auth-conversation-header"><div className="auth-group-icon"><MessageCircle size={22} /></div><div><strong>The everyday crew</strong><span>3 friends, endless conversations</span></div><div className="auth-online-dot" /></div>
+          <div className="auth-conversation-date">TODAY</div>
+          <div className="auth-demo-message auth-demo-first"><img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=80&h=80&q=80" alt="" /><div><span className="auth-demo-name">Maya</span><p>Same time. Same people.<br />New memories?</p><time>10:24</time></div></div>
+          <div className="auth-demo-message auth-demo-sent"><div><p>Wouldn&apos;t miss it for the world.</p><time>10:24 <CheckCheck size={14} /></time></div></div>
+          <div className="auth-demo-message auth-demo-last"><img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=80&h=80&q=80" alt="" /><div><span className="auth-demo-name">Alex</span><p>My favorite notification.</p><time>10:25</time></div></div>
+          <div className="auth-demo-typing"><span /><span /><span /></div>
+          <div className="auth-demo-composer"><Plus size={18} /><span>Message your people...</span><span className="auth-demo-send"><Send size={16} /></span></div>
+        </div>
+        <div className="auth-visual-bottom"><span className="auth-mini-mark"><MessageCircle size={17} /> Made for the everyday moments.</span><span>01 / 01</span></div>
+      </aside>
       <section className="auth-form-section auth-panel">
-        
-        {/* Header Branding section */}
-        <div className="mb-7">
-          <p className="eyebrow">LET&apos;S CONNECT</p>
+        <div className="auth-mode-switch" aria-label="Account access">
+          <button type="button" aria-pressed={isLogin} disabled={isLoading} onClick={() => { if (!isLogin) toggleLogin(); }}>Sign in</button>
+          <button type="button" aria-pressed={!isLogin} disabled={isLoading} onClick={() => { if (isLogin) toggleLogin(); }}>Create account</button>
+        </div>
+        <div className="auth-form-heading">
+          <span className="auth-heading-icon"><MessageCircle size={23} /></span>
+          <p className="eyebrow">{isLogin ? "YOUR PEOPLE ARE HERE" : "A NEW CONNECTION STARTS HERE"}</p>
           <h1>{isLogin ? "Welcome back." : "Create your account."}</h1>
-          <p className="auth-subtitle">{isLogin ? "Sign in to your ChatBuddy workspace." : `Step ${signUpStep} of 2`}</p>
+          <p className="auth-subtitle">{subtitle}</p>
           {!isLogin && (
-            <div className="flex justify-center items-center gap-2 mt-2">
-              <span className={`w-8 h-1.5 rounded-full transition-all duration-300 ${signUpStep === 1 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-              <span className={`w-8 h-1.5 rounded-full transition-all duration-300 ${signUpStep === 2 ? 'bg-indigo-600' : 'bg-slate-200'}`} />
-            </div>
+            <ol className="auth-steps" aria-label="Registration progress">
+              <li className="is-current" aria-current={signUpStep === 1 ? "step" : undefined}><span>{signUpStep === 2 ? <Check size={13} /> : "1"}</span>Your profile</li>
+              <li className={signUpStep === 2 ? "is-current" : ""} aria-current={signUpStep === 2 ? "step" : undefined}><span>2</span>Your account</li>
+            </ol>
           )}
         </div>
 
-        {/* --- DYNAMIC MULTI-STAGE AUTH FLOW --- */}
-        <div className="flex-1 flex flex-col justify-center overflow-hidden">
+        <AnimatePresence mode="wait" initial={false}>
+        <motion.div key={isLogin ? "login" : `signup-${signUpStep}`} initial={{ opacity: 0, x: reduceMotion ? 0 : 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: reduceMotion ? 0 : -12 }} transition={{ duration: reduceMotion ? 0 : 0.2 }}>
           {isLogin ? (
             /* --- LOGIN FORM --- */
             <form onSubmit={handleLogin} className="space-y-4 animate-fadeIn">
@@ -341,7 +360,7 @@ const Login = () => {
                       onClick={handlePrevStep}
                       className="w-1/3 py-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-sm uppercase tracking-wider transition-all"
                     >
-                      Back
+                      <ArrowLeft size={16} /> Back
                     </button>
                     <button
                       type="submit"
@@ -356,22 +375,21 @@ const Login = () => {
               )}
             </div>
           )}
-        </div>
+        </motion.div>
+        </AnimatePresence>
 
-        {/* Dynamic Navigation Toggle Footer Area */}
-        <div className="mt-4 space-y-3">
-
+        <div className="auth-switch-footer">
+          <span>{isLogin ? "New around here?" : "Already one of the crew?"}</span>
           <button
             type="button"
             disabled={isLoading}
             onClick={toggleLogin}
             className="w-full py-2 text-indigo-600 hover:text-indigo-500 font-bold text-xs transition-colors duration-150 focus:outline-none"
           >
-            {isLogin ? "Create an account" : "Already have an account? Sign in"}
+            {isLogin ? "Create an account" : "Sign in"}
           </button>
         </div>
       </section>
-      <aside className="auth-visual" aria-label="ChatBuddy workspace"><img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1200&q=85" alt="A team working together around a table" /><div className="auth-visual-caption"><span>CHATBUDDY</span><h2>A place for your people.</h2></div></aside>
       </main>
       <Dialog
         open={Boolean(cropSource)}

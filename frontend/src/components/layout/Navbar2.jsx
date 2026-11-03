@@ -1,6 +1,6 @@
 import React, { Suspense, lazy, useState } from "react";
 import { Avatar, Backdrop, Menu, MenuItem, Tooltip } from "@mui/material";
-import { Bell, LogOut, MessageCircle, MessageSquarePlus, Search, Users, UserRound, Menu as MenuIcon } from "lucide-react";
+import { Bell, ChevronDown, LogOut, MessageCircle, MessageSquarePlus, Search, Users, UserRound, Menu as MenuIcon } from "lucide-react";
 import ThemeToggle from "../shared/ThemeToggle";
 import api from "../../redux/api/api";
 import { useNavigate, NavLink } from "react-router-dom";
@@ -8,7 +8,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 
-import { server } from "../../constants/config";
+import { server } from "../../constants/frontendConstant.js";
 
 import { userNotExists } from "../../redux/reducers/auth";
 
@@ -89,10 +89,9 @@ const Navbar2 = ({ onOpenConversations }) => {
           <NavLink to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</NavLink>
         </div>
         <nav aria-label="Workspace actions" className="header-actions">
-          {actions.map(({ label, icon: Icon, run }) => <Tooltip title={label} key={label}><button aria-label={label} onClick={run} className="icon-button desktop-only"><Icon size={19} /></button></Tooltip>)}
           <ThemeToggle />
           <Tooltip title="Notifications"><button className="icon-button relative" aria-label="Notifications" onClick={openNotification}><Bell size={19} />{notificationCount > 0 && <span className="notification-dot">{notificationCount > 9 ? "9+" : notificationCount}</span>}</button></Tooltip>
-          <Tooltip title="Account menu"><button className="icon-button" aria-label="Account menu" aria-haspopup="menu" aria-expanded={Boolean(anchor)} onClick={(event) => setAnchor(event.currentTarget)}><Avatar src={user?.avatar?.url} alt={user?.name} sx={{ width: 30, height: 30, fontSize: 13 }}>{user?.name?.[0]}</Avatar></button></Tooltip>
+          <Tooltip title="Account menu"><button className="icon-button" style={{ width: "auto", gap: 6, padding: "0 6px" }} aria-label="Account menu" aria-haspopup="menu" aria-expanded={Boolean(anchor)} onClick={(event) => setAnchor(event.currentTarget)}><Avatar src={user?.avatar?.url} alt={user?.name} sx={{ width: 30, height: 30, fontSize: 13 }}>{user?.name?.[0]}</Avatar><ChevronDown size={15} /></button></Tooltip>
         </nav>
       </header>
       <Menu anchorEl={anchor} open={Boolean(anchor)} onClose={() => setAnchor(null)}>

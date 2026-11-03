@@ -14,7 +14,7 @@ import moment from "moment";
 import React from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
 import { DoughnutChart, LineChart } from "../../components/specific/Charts";
-import { server } from "../../constants/config";
+import { server } from "../../constants/frontendConstant.js";
 import { useErrors } from "../../hooks/hook";
 import ChatSkeleton from "../../components/shared/ChatSkeleton";
 

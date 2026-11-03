@@ -5,9 +5,13 @@ const errorMiddleware = (err, req, res, next) => {
   err.statusCode ||= 500;
 
   if (err.code === 11000) {
-    const error = Object.keys(err.keyPattern).join(",");
-    err.message = `Duplicate field - ${error}`;
-    err.statusCode = 400;
+    const duplicateFields = err.keyPattern || err.keyValue || {};
+    const isUsernameDuplicate = Object.hasOwn(duplicateFields, "username");
+    const error = Object.keys(duplicateFields).join(",");
+    err.message = isUsernameDuplicate
+      ? "Username is already taken. Please choose another one."
+      : `Duplicate field - ${error}`;
+    err.statusCode = isUsernameDuplicate ? 409 : 400;
   }
 
   if (err.name === "CastError") {

@@ -10,7 +10,7 @@ import ChatList from "../specific/ChatList";
 import ChatSkeleton from "../shared/ChatSkeleton";
 import { useErrors, useSocketEvents } from "../../hooks/hook";
 import { getOrSaveFromStorage } from "../../lib/features";
-import { useMyChatsQuery } from "../../redux/api/api";
+import api, { useMyChatsQuery } from "../../redux/api/api";
 import { incrementNotification, setNewMessagesAlert } from "../../redux/reducers/chat";
 import { setIsDeleteMenu, setIsMobile, setSelectedDeleteChat } from "../../redux/reducers/misc";
 import { getSocket } from "../../socket";
@@ -65,6 +65,7 @@ const AppLayout = () => (WrappedComponent) => {
 
     const newRequestListener = useCallback(() => {
       dispatch(incrementNotification());
+      dispatch(api.util.invalidateTags(["Notification"]));
     }, [dispatch]);
 
     const refetchListener = useCallback(() => {

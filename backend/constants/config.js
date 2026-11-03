@@ -1,13 +1,8 @@
 import "dotenv/config";
+import { frontendUrl } from "../backendConstant.js";
 
 const corsOptions = {
-  origin: (
-    process.env.CLIENT_URL ||
-    "http://localhost:5173,http://localhost:5174,http://localhost:5175"
-  )
-    .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean),
+  origin: frontendUrl,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
 };

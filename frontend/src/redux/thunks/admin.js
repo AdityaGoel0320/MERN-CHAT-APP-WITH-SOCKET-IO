@@ -1,5 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { server } from "../../constants/config";
+import { server } from "../../constants/frontendConstant";
 import axios from "axios";
 
 const adminLogin = createAsyncThunk("admin/login", async (secretKey) => {
