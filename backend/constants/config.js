@@ -8,6 +8,6 @@ const corsOptions = {
 };
 
 
-const CHATTU_TOKEN = "chattu-token";
+const chatAppToken_TOKEN = "chatAppToken-token";
 
-export { corsOptions, CHATTU_TOKEN };
+export { corsOptions, chatAppToken_TOKEN };

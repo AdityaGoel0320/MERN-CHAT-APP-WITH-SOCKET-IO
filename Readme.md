@@ -99,7 +99,7 @@ Create a `.env` file inside the `backend` directory:
 ```dotenv
 PORT=1111
 NODE_ENV=development
-MONGO_URI=mongodb://127.0.0.1:27017/Chattu
+MONGO_URI=mongodb://127.0.0.1:27017/DB_of_your_choice
 JWT_SECRET=replace-with-a-long-random-secret
 ADMIN_SECRET_KEY=replace-with-a-different-long-random-secret
 CLOUDINARY_CLOUD_NAME=your-cloud-name
@@ -107,7 +107,7 @@ CLOUDINARY_API_KEY=your-api-key
 CLOUDINARY_API_SECRET=your-api-secret
 ```
 
-For Atlas, replace `MONGO_URI` with your own connection string and configure network access. The connection helper explicitly selects the database name `Chattu`.
+For Atlas, replace `MONGO_URI` with your own connection string and configure network access. The connection helper explicitly selects the database name `DB_of_your_choice`.
 
 Keep credentials out of source control. Use distinct JWT and admin secrets; never expose backend secrets through frontend configuration.
 
