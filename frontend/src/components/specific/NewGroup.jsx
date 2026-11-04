@@ -3,13 +3,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { useInputValidation } from "6pp";
 import toast from "react-hot-toast";
 
-import UserItem from "../shared/UserItem";
 import ChatSkeleton from "../shared/ChatSkeleton";
+import { transformImage } from "../../lib/features";
 import { useAsyncMutation, useErrors } from "../../hooks/hook";
 import { useAvailableFriendsQuery, useNewGroupMutation } from "../../redux/api/api";
 import { setIsNewGroup } from "../../redux/reducers/misc";
-import { Dialog } from "@mui/material";
-import { LoaderCircle, Users } from "lucide-react";
+import { Avatar, Dialog } from "@mui/material";
+import { LoaderCircle, Users, X } from "lucide-react";
 
 const NewGroup = () => {
   const { isNewGroup } = useSelector((state) => state.misc);
@@ -32,7 +32,9 @@ const NewGroup = () => {
     );
   };
 
-  const submitHandler = async () => {
+  const submitHandler = async (event) => {
+    event.preventDefault();
+    if (isLoadingNewGroup) return;
     if (!groupName.value.trim()) return toast.error("Group name is required");
     if (selectedMembers.length < 2) return toast.error("Please select at least 2 members");
 
@@ -41,117 +43,95 @@ const NewGroup = () => {
       members: selectedMembers,
     });
 
-    if (result) closeHandler();
+    if (result) dispatch(setIsNewGroup(false));
   };
 
   const closeHandler = () => {
-    dispatch(setIsNewGroup(false));
+    if (!isLoadingNewGroup) dispatch(setIsNewGroup(false));
   };
 
   if (!isNewGroup) return null;
 
   return (
-    /* Modal Layer Blur Backdrop Mask */
-    <Dialog open={isNewGroup} onClose={closeHandler} fullWidth maxWidth="xs" aria-labelledby="new-group-title" PaperProps={{ className: "dialog-panel" }}>
-      {/* --- MAIN GLASS CARD CONTROLLER --- */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="dialog-content"
-      >
-        <style>{`
-          .no-scrollbar::-webkit-scrollbar { display: none !important; }
-          .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        `}</style>
+    <Dialog open={isNewGroup} onClose={closeHandler} fullWidth maxWidth="xs" aria-labelledby="new-group-title" PaperProps={{ className: "dialog-panel new-group-panel" }}>
+      <form onSubmit={submitHandler} className="new-group-form" aria-busy={isLoadingNewGroup}>
+        <header className="new-group-header">
+          <h2 id="new-group-title">New group</h2>
+          <button type="button" className="icon-button" onClick={closeHandler} disabled={isLoadingNewGroup} aria-label="Close new group" title="Close">
+            <X size={20} />
+          </button>
+        </header>
 
-        {/* Header Title Section */}
-        <div className="text-center mb-5">
-          <h2 id="new-group-title">
-            New group
-          </h2>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-            {selectedMembers.length} members selected
-          </p>
-        </div>
-
-        {/* Input Text Form Deck */}
-        <div className="space-y-4 flex-1 flex flex-col overflow-hidden">
-          <div className="flex flex-col gap-1 shrink-0">
+        <div className="new-group-body">
+          <div className="new-group-name">
             <label htmlFor="group-name">Group name</label>
             <input
               id="group-name"
-              autoFocus
+              required
               maxLength={80}
               type="text"
               value={groupName.value}
               onChange={groupName.changeHandler}
-              className="w-full px-4 py-2.5 rounded-xl bg-white/90 border border-slate-200 focus:border-indigo-500 text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/10 transition-all shadow-none font-semibold"
-              placeholder="e.g., Core Developers Team"
+              disabled={isLoadingNewGroup}
+              placeholder="e.g. Core Developers"
             />
           </div>
 
-          {/* Members Subsection Header Label */}
-          <div className="flex items-center justify-between shrink-0 pt-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-              Members
-            </span>
-            <span className="text-[10px] font-extrabold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md border border-indigo-100/40">
-              {selectedMembers.length} Selected
-            </span>
+          <div className="new-group-members-heading">
+            <h3 id="group-members-label">Members <span>(minimum 2)</span></h3>
+            <output aria-live="polite">{selectedMembers.length} selected</output>
           </div>
 
-          {/* --- SCROLL-LOCKED FRIENDS CONTAINER --- */}
-          <div className="flex-1 overflow-y-auto space-y-2 pr-0.5 no-scrollbar">
-            {isLoading ? (
-              <ChatSkeleton />
-            ) : data?.friends && data.friends.length > 0 ? (
-              data.friends.map((i) => (
-                <div 
-                  key={i._id}
-                  className={`p-0.5 rounded-xl border transition-all duration-200 ${
-                    selectedMembers.includes(i._id)
-                      ? "bg-indigo-50/40 border-indigo-200/60 shadow-none"
-                      : "bg-white/40 border-white/60 hover:bg-white/80"
-                  }`}
-                >
-                  <UserItem
-                    user={i}
-                    handler={selectMemberHandler}
-                    isAdded={selectedMembers.includes(i._id)}
+          <fieldset className="new-group-member-list" aria-labelledby="group-members-label">
+            {isLoading && <ChatSkeleton />}
+            {!isLoading && isError && (
+              <p className="new-group-empty" role="alert">Could not load members. Please try again later.</p>
+            )}
+            {!isLoading && !isError && data?.friends?.length > 0 && (
+              data.friends.map((friend) => (
+                <label key={friend._id} className={`new-group-member${selectedMembers.includes(friend._id) ? " is-selected" : ""}`}>
+                  <Avatar src={transformImage(typeof friend.avatar === "string" ? friend.avatar : friend.avatar?.url)} alt="" sx={{ width: 36, height: 36 }}>
+                    {friend.name?.[0]}
+                  </Avatar>
+                  <span>{friend.name}</span>
+                  <input
+                    type="checkbox"
+                    checked={selectedMembers.includes(friend._id)}
+                    onChange={() => selectMemberHandler(friend._id)}
+                    disabled={isLoadingNewGroup}
+                    aria-label={`Select ${friend.name}`}
                   />
-                </div>
+                </label>
               ))
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center opacity-60">
+            )}
+            {!isLoading && !isError && !data?.friends?.length && (
+              <div className="new-group-empty">
                 <Users size={24} />
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  No friends available
-                </p>
+                <p>No friends available</p>
               </div>
             )}
-          </div>
+          </fieldset>
         </div>
 
-        {/* --- ACTIONS TRIGGER FOOTER LAYOUT --- */}
-        <div className="flex gap-3 mt-6 pt-2 shrink-0 border-t border-slate-100">
+        <footer className="new-group-footer">
           <button
             type="button"
             onClick={closeHandler}
-            className="w-1/3 py-2.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-500 font-bold text-xs uppercase tracking-wider transition-all"
+            disabled={isLoadingNewGroup}
+            className="new-group-cancel"
           >
             Cancel
           </button>
           <button
-            type="button"
-            onClick={submitHandler}
-            disabled={isLoadingNewGroup}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:bg-indigo-400 text-white font-black text-xs uppercase tracking-widest shadow-md hover:shadow-indigo-500/10 transition-all flex items-center justify-center gap-2"
+            type="submit"
+            disabled={isLoadingNewGroup || isLoading || isError || !groupName.value.trim() || selectedMembers.length < 2}
+            className="new-group-create"
           >
             {isLoadingNewGroup && <LoaderCircle size={18} className="animate-spin" />}
-            Create group
+            {isLoadingNewGroup ? "Creating..." : "Create group"}
           </button>
-        </div>
-
-      </div>
+        </footer>
+      </form>
     </Dialog>
   );
 };
