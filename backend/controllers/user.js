@@ -95,11 +95,25 @@ const searchUser = TryCatch(async (req, res) => {
     name: { $regex: name, $options: "i" },
   });
 
-  // Modifying the response
+  const pendingRequests = await Request.find({
+    $or: [{ sender: req.user }, { receiver: req.user }],
+  }).select("sender receiver");
+
+  const requestStatuses = new Map(
+    pendingRequests.map(({ sender, receiver }) => {
+      const isSender = sender.toString() === req.user.toString();
+      return [
+        (isSender ? receiver : sender).toString(),
+        isSender ? "sent" : "received",
+      ];
+    })
+  );
+
   const users = allUsersExceptMeAndFriends.map(({ _id, name, avatar }) => ({
     _id,
     name,
     avatar: avatar.url,
+    requestStatus: requestStatuses.get(_id.toString()) || null,
   }));
 
   return res.status(200).json({

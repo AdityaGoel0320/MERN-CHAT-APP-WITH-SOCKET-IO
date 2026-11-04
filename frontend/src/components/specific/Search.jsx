@@ -23,7 +23,13 @@ const Search = () => {
   const [searchError, setSearchError] = useState("");
 
   const addFriendHandler = async (id) => {
-    await sendFriendRequest("Sending friend request...", { userId: id });
+    if (isLoadingSendFriendRequest || users.find((user) => user._id === id)?.requestStatus) return;
+    const result = await sendFriendRequest("Sending friend request...", { userId: id });
+    if (result?.success) {
+      setUsers((currentUsers) => currentUsers.map((user) => (
+        user._id === id ? { ...user, requestStatus: "sent" } : user
+      )));
+    }
   };
 
   const searchCloseHandler = () => dispatch(setIsSearch(false));
@@ -116,6 +122,7 @@ const Search = () => {
                   user={i}
                   handler={addFriendHandler}
                   handlerIsLoading={isLoadingSendFriendRequest}
+                  requestStatus={i.requestStatus}
                 />
               </div>
             ))

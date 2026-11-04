@@ -8,6 +8,7 @@ const UserItem = ({
   handler,
   handlerIsLoading,
   isAdded = false,
+  requestStatus = null,
   styling = {},
 }) => {
   const { name, _id, avatar } = user;
@@ -34,7 +35,11 @@ const UserItem = ({
       </div>
 
       {/* --- PREMIUM TOGGLE ACTION NODE BUTTON --- */}
-      <button
+      {requestStatus ? (
+        <output className="text-xs font-medium text-slate-500 shrink-0">
+          {requestStatus === "sent" ? "Request sent" : "Request received"}
+        </output>
+      ) : <button
         type="button"
         disabled={handlerIsLoading}
         onClick={() => handler(_id)}
@@ -50,7 +55,7 @@ const UserItem = ({
         ) : (
           <Plus size={18} />
         )}
-      </button>
+      </button>}
     </div>
   );
 };

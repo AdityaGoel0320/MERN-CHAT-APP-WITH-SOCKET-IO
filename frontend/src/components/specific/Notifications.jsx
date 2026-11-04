@@ -8,7 +8,7 @@ import {
 import { setIsNotification } from "../../redux/reducers/misc";
 import ChatSkeleton from "../shared/ChatSkeleton";
 import { transformImage } from "../../lib/features";
-import { Dialog } from "@mui/material";
+import { Avatar, Dialog } from "@mui/material";
 import { BellOff, Check, X } from "lucide-react";
 
 const Notifications = () => {
@@ -100,15 +100,12 @@ const NotificationItem = memo(({ sender, _id, handler, disabled }) => {
       
       {/* Sender Profile Stack Info */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
-        <img
-          src={transformImage(avatar?.url)}
+        <Avatar
+          src={transformImage(typeof avatar === "string" ? avatar : avatar?.url)}
           alt={`${name}'s avatar`}
           className="w-10 h-10 rounded-full object-cover bg-slate-100 border border-slate-200/60 shrink-0 shadow-sm"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=80&auto=format&fit=crop";
-          }}
-        />
+          sx={{ width: 40, height: 40 }}
+        >{name?.[0]}</Avatar>
         <div className="flex flex-col min-w-0">
           <p className="text-xs text-slate-700 font-medium leading-normal line-clamp-2">
             <span className="font-bold text-slate-900">{name}</span> sent you a friend request.

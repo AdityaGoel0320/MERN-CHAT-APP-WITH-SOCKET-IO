@@ -50,7 +50,7 @@ const api = createApi({
         credentials: "include",
         body: data,
       }),
-      invalidatesTags: ["Chat", "Notification"],
+      invalidatesTags: ["Chat", "Notification", "User"],
     }),
 
     chatDetails: builder.query({
