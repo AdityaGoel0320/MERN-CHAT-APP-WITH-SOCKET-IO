@@ -89,7 +89,12 @@ const columns = [
 ];
 
 const MessageManagement = () => {
-  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/messages`, key: "dashboard-messages", credentials: "include", dependencyProps: [] });
+  const { loading, data, error } = useFetchData({
+    url: `${server}/api/v1/admin/messages`,
+    key: "dashboard-messages",
+    credentials: "include",
+    dependencyProps: [],
+  });
 
   useErrors([
     {
@@ -119,7 +124,7 @@ const MessageManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <ChatSkeleton/>
+        <ChatSkeleton />
       ) : (
         <Table
           heading={"All Messages"}

@@ -4,7 +4,9 @@ export const getOtherMember = (members, userId) =>
   members.find((member) => member._id.toString() !== userId.toString());
 
 export const getSockets = (users = []) => {
-  const sockets = users.flatMap((user) => Array.from(userSocketIDs.get(user.toString()) || []));
+  const sockets = users.flatMap((user) =>
+    Array.from(userSocketIDs.get(user.toString()) || [])
+  );
 
   return sockets;
 };

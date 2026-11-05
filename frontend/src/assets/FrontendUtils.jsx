@@ -1,1 +1,1 @@
-export const AppName  = "ChatBuddy"
+export const AppName = "ChatBuddy";

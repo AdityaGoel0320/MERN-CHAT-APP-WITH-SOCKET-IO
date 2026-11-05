@@ -7,7 +7,6 @@ const corsOptions = {
   credentials: true,
 };
 
-
 const chatAppToken_TOKEN = "chatAppToken-token";
 
 export { corsOptions, chatAppToken_TOKEN };

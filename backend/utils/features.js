@@ -6,8 +6,9 @@ import { v2 as cloudinary } from "cloudinary";
 import { getBase64, getSockets } from "../lib/helper.js";
 import { frontendUrl } from "../backendConstant.js";
 
-const useSecureCookies = process.env.NODE_ENV?.trim().toLowerCase() === "production"
-  || new URL(frontendUrl).protocol === "https:";
+const useSecureCookies =
+  process.env.NODE_ENV?.trim().toLowerCase() === "production" ||
+  new URL(frontendUrl).protocol === "https:";
 
 const cookieOptions = {
   maxAge: 15 * 24 * 60 * 60 * 1000,
@@ -27,13 +28,18 @@ const connectDB = (uri) => {
 };
 
 const sendToken = (res, user, code, message) => {
-  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "15d" });
-
-  return res.status(code).cookie("chatAppToken-token", token, cookieOptions).json({
-    success: true,
-    user,
-    message,
+  const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "15d",
   });
+
+  return res
+    .status(code)
+    .cookie("chatAppToken-token", token, cookieOptions)
+    .json({
+      success: true,
+      user,
+      message,
+    });
 };
 
 const emitEvent = (req, event, users, data) => {
@@ -75,7 +81,11 @@ const uploadFilesToCloudinary = async (files = []) => {
 const deletFilesFromCloudinary = async (public_ids) => {
   for (let offset = 0; offset < public_ids.length; offset += 100) {
     const batch = public_ids.slice(offset, offset + 100);
-    await Promise.all(["image", "video", "raw"].map((resource_type) => cloudinary.api.delete_resources(batch, { resource_type })));
+    await Promise.all(
+      ["image", "video", "raw"].map((resource_type) =>
+        cloudinary.api.delete_resources(batch, { resource_type })
+      )
+    );
   }
 };
 

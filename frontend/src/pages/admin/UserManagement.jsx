@@ -51,7 +51,12 @@ const columns = [
   },
 ];
 const UserManagement = () => {
-  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/users`, key: "dashboard-users", credentials: "include", dependencyProps: [] });
+  const { loading, data, error } = useFetchData({
+    url: `${server}/api/v1/admin/users`,
+    key: "dashboard-users",
+    credentials: "include",
+    dependencyProps: [],
+  });
 
   useErrors([
     {
@@ -77,7 +82,7 @@ const UserManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <ChatSkeleton/>
+        <ChatSkeleton />
       ) : (
         <Table heading={"All Users"} columns={columns} rows={rows} />
       )}

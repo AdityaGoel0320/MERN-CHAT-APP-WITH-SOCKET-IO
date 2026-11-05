@@ -70,10 +70,19 @@ const LineChart = ({ value = [] }) => {
     ],
   };
 
-  const options = { ...lineChartOptions, scales: {
-    x: { ...lineChartOptions.scales.x, ticks: { color: theme.palette.text.secondary } },
-    y: { ...lineChartOptions.scales.y, ticks: { color: theme.palette.text.secondary, precision: 0 } },
-  } };
+  const options = {
+    ...lineChartOptions,
+    scales: {
+      x: {
+        ...lineChartOptions.scales.x,
+        ticks: { color: theme.palette.text.secondary },
+      },
+      y: {
+        ...lineChartOptions.scales.y,
+        ticks: { color: theme.palette.text.secondary, precision: 0 },
+      },
+    },
+  };
   return <Line data={data} options={options} />;
 };
 

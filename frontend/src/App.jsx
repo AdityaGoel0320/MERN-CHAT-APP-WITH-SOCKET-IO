@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect } from "react";
-import "./App.css"
+import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectRoute from "./components/auth/ProtectRoute";
 import { LayoutLoader } from "./components/layout/Loaders";
@@ -21,12 +21,11 @@ const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const UserManagement = lazy(() => import("./pages/admin/UserManagement"));
 const ChatManagement = lazy(() => import("./pages/admin/ChatManagement"));
-const MessagesManagement = lazy(() =>
-  import("./pages/admin/MessageManagement")
+const MessagesManagement = lazy(
+  () => import("./pages/admin/MessageManagement")
 );
 
 const UserProfile = lazy(() => import("./components/specific/UserProfile"));
-
 
 const App = () => {
   const { user, loader } = useSelector((state) => state.auth);
@@ -35,7 +34,10 @@ const App = () => {
 
   useEffect(() => {
     axios
-      .get(`${server}/api/v1/user/me`, { withCredentials: true, timeout: 10000 })
+      .get(`${server}/api/v1/user/me`, {
+        withCredentials: true,
+        timeout: 10000,
+      })
       .then(({ data }) => dispatch(userExists(data.user)))
       .catch(() => dispatch(userNotExists()));
   }, [dispatch]);
@@ -48,13 +50,17 @@ const App = () => {
         <Routes>
           <Route
             element={
-              user ? <SocketProvider>
+              user ? (
+                <SocketProvider>
+                  <ProtectRoute user={user} />
+                </SocketProvider>
+              ) : (
                 <ProtectRoute user={user} />
-              </SocketProvider> : <ProtectRoute user={user} />
+              )
             }
           >
             <Route path="/" element={<Home />} />
-            <Route path="/user" element={<UserProfile/>} />
+            <Route path="/user" element={<UserProfile />} />
             <Route path="/chat/:chatId" element={<Chat />} />
             <Route path="/groups" element={<Groups />} />
           </Route>
@@ -78,7 +84,17 @@ const App = () => {
         </Routes>
       </Suspense>
 
-      <Toaster position="bottom-center" toastOptions={{ style: { background: "var(--surface)", color: "var(--ink)", border: "1px solid var(--line)", fontSize: "13px" } }} />
+      <Toaster
+        position="bottom-center"
+        toastOptions={{
+          style: {
+            background: "var(--surface)",
+            color: "var(--ink)",
+            border: "1px solid var(--line)",
+            fontSize: "13px",
+          },
+        }}
+      />
     </BrowserRouter>
   );
 };

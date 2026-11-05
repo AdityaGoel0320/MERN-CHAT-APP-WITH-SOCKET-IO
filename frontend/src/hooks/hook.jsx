@@ -5,7 +5,10 @@ const useErrors = (errors = []) => {
   const previousErrors = useRef([]);
   useEffect(() => {
     errors.forEach(({ isError, error, fallback }, index) => {
-      const message = typeof error === "string" ? error : error?.data?.message || "Something went wrong";
+      const message =
+        typeof error === "string"
+          ? error
+          : error?.data?.message || "Something went wrong";
       const fingerprint = isError ? `${error?.status || ""}:${message}` : null;
       if (fingerprint && previousErrors.current[index] !== fingerprint) {
         if (fallback) fallback();

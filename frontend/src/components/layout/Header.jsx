@@ -74,23 +74,17 @@ const Header = () => {
 
   return (
     <>
-      <div >
-        <AppBar
- 
-        >
+      <div>
+        <AppBar>
           <Toolbar>
-              {AppName}
+            {AppName}
 
-            <div
-     
-            >
+            <div>
               <IconButton color="inherit" onClick={handleMobile}>
                 <MenuIcon />
               </IconButton>
             </div>
-            <div
-           
-            />
+            <div />
             <div>
               <IconBtn
                 title={"Search"}
@@ -140,7 +134,7 @@ const Header = () => {
       )}
 
       {isNewGroup && (
-        <Suspense className ="bg-red-500" fallback={<Backdrop open />}>
+        <Suspense className="bg-red-500" fallback={<Backdrop open />}>
           <NewGroupDialog />
         </Suspense>
       )}

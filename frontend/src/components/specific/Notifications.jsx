@@ -16,13 +16,18 @@ const Notifications = () => {
   const dispatch = useDispatch();
 
   const { isLoading, data, error, isError } = useGetNotificationsQuery();
-  const [acceptRequest, isAccepting] = useAsyncMutation(useAcceptFriendRequestMutation);
+  const [acceptRequest, isAccepting] = useAsyncMutation(
+    useAcceptFriendRequestMutation
+  );
 
   const friendRequestHandler = async ({ _id, accept }) => {
-    const result = await acceptRequest(accept ? "Accepting request..." : "Declining request...", { 
-      requestId: _id, 
-      accept 
-    });
+    const result = await acceptRequest(
+      accept ? "Accepting request..." : "Declining request...",
+      {
+        requestId: _id,
+        accept,
+      }
+    );
     if (result) dispatch(setIsNotification(false));
   };
 
@@ -34,12 +39,16 @@ const Notifications = () => {
 
   return (
     /* Modal Layer Overlay Blur Mask */
-    <Dialog open={isNotification} onClose={closeHandler} fullWidth maxWidth="xs" aria-labelledby="notifications-title" PaperProps={{ className: "dialog-panel" }}>
+    <Dialog
+      open={isNotification}
+      onClose={closeHandler}
+      fullWidth
+      maxWidth="xs"
+      aria-labelledby="notifications-title"
+      PaperProps={{ className: "dialog-panel" }}
+    >
       {/* --- MAIN GLASS CONTAINER CARD --- */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="dialog-content"
-      >
+      <div onClick={(e) => e.stopPropagation()} className="dialog-content">
         <style>{`
           .no-scrollbar::-webkit-scrollbar { display: none !important; }
           .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -47,10 +56,8 @@ const Notifications = () => {
 
         {/* Header Section */}
         <div className="text-center relative mb-5 shrink-0">
-          <h2 id="notifications-title">
-            Notifications
-          </h2>
-          <button 
+          <h2 id="notifications-title">Notifications</h2>
+          <button
             onClick={closeHandler}
             aria-label="Close notifications"
             className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-sm p-1"
@@ -60,9 +67,7 @@ const Notifications = () => {
         </div>
 
         {/* --- SCROLLABLE REQUEST LIST FEEDS TRACK --- */}
-        <div 
-          className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 no-scrollbar"
-        >
+        <div className="flex-1 overflow-y-auto space-y-2.5 pr-0.5 no-scrollbar">
           {isLoading ? (
             <ChatSkeleton />
           ) : data?.allRequests && data.allRequests.length > 0 ? (
@@ -94,21 +99,25 @@ const Notifications = () => {
 /* --- SUB-COMPONENT: INDIVIDUAL REQUEST LINE ROW ROWCELL --- */
 const NotificationItem = memo(({ sender, _id, handler, disabled }) => {
   const { name, avatar } = sender;
-  
+
   return (
     <div className="w-full flex items-center justify-between gap-4 p-3 rounded-2xl bg-white/40 border border-white/50 hover:bg-white/80 transition-all duration-150 shadow-sm group">
-      
       {/* Sender Profile Stack Info */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <Avatar
-          src={transformImage(typeof avatar === "string" ? avatar : avatar?.url)}
+          src={transformImage(
+            typeof avatar === "string" ? avatar : avatar?.url
+          )}
           alt={`${name}'s avatar`}
           className="w-10 h-10 rounded-full object-cover bg-slate-100 border border-slate-200/60 shrink-0 shadow-sm"
           sx={{ width: 40, height: 40 }}
-        >{name?.[0]}</Avatar>
+        >
+          {name?.[0]}
+        </Avatar>
         <div className="flex flex-col min-w-0">
           <p className="text-xs text-slate-700 font-medium leading-normal line-clamp-2">
-            <span className="font-bold text-slate-900">{name}</span> sent you a friend request.
+            <span className="font-bold text-slate-900">{name}</span> sent you a
+            friend request.
           </p>
         </div>
       </div>
@@ -134,7 +143,6 @@ const NotificationItem = memo(({ sender, _id, handler, disabled }) => {
           <Check size={16} />
         </button>
       </div>
-
     </div>
   );
 });

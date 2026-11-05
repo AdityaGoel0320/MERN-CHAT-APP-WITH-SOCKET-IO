@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useInputValidation } from "6pp";
 import { useAsyncMutation } from "../../hooks/hook";
-import { useLazySearchUserQuery, useSendFriendRequestMutation } from "../../redux/api/api";
+import {
+  useLazySearchUserQuery,
+  useSendFriendRequestMutation,
+} from "../../redux/api/api";
 import { setIsSearch } from "../../redux/reducers/misc";
 import UserItem from "../shared/UserItem";
 import { Dialog } from "@mui/material";
@@ -23,12 +26,20 @@ const Search = () => {
   const [searchError, setSearchError] = useState("");
 
   const addFriendHandler = async (id) => {
-    if (isLoadingSendFriendRequest || users.find((user) => user._id === id)?.requestStatus) return;
-    const result = await sendFriendRequest("Sending friend request...", { userId: id });
+    if (
+      isLoadingSendFriendRequest ||
+      users.find((user) => user._id === id)?.requestStatus
+    )
+      return;
+    const result = await sendFriendRequest("Sending friend request...", {
+      userId: id,
+    });
     if (result?.success) {
-      setUsers((currentUsers) => currentUsers.map((user) => (
-        user._id === id ? { ...user, requestStatus: "sent" } : user
-      )));
+      setUsers((currentUsers) =>
+        currentUsers.map((user) =>
+          user._id === id ? { ...user, requestStatus: "sent" } : user
+        )
+      );
     }
   };
 
@@ -41,10 +52,20 @@ const Search = () => {
     setSearchError("");
     const timeOutId = setTimeout(() => {
       request = searchUser(search.value.trim());
-      request.unwrap()
-        .then((data) => { if (active) setUsers(data.users || []); })
-        .catch(() => { if (active) { setUsers([]); setSearchError("Could not find people. Please try again."); } })
-        .finally(() => { if (active) setIsSearching(false); });
+      request
+        .unwrap()
+        .then((data) => {
+          if (active) setUsers(data.users || []);
+        })
+        .catch(() => {
+          if (active) {
+            setUsers([]);
+            setSearchError("Could not find people. Please try again.");
+          }
+        })
+        .finally(() => {
+          if (active) setIsSearching(false);
+        });
     }, 350);
 
     return () => {
@@ -59,7 +80,14 @@ const Search = () => {
 
   return (
     /* Clickable background overlay screen mask */
-    <Dialog open={isSearch} onClose={searchCloseHandler} fullWidth maxWidth="xs" aria-labelledby="search-title" PaperProps={{ className: "dialog-panel" }}>
+    <Dialog
+      open={isSearch}
+      onClose={searchCloseHandler}
+      fullWidth
+      maxWidth="xs"
+      aria-labelledby="search-title"
+      PaperProps={{ className: "dialog-panel" }}
+    >
       {/* Main Glass Card Modal Window */}
       <div
         onClick={(e) => e.stopPropagation()} // Stop click bubbling up to modal close handler
@@ -67,10 +95,8 @@ const Search = () => {
       >
         {/* Header Title Grid Matrix */}
         <div className="text-center relative mb-5">
-          <h2 id="search-title">
-            Find People
-          </h2>
-          <button 
+          <h2 id="search-title">Find People</h2>
+          <button
             onClick={searchCloseHandler}
             aria-label="Close people search"
             className="absolute right-0 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors text-sm p-1"
@@ -97,12 +123,12 @@ const Search = () => {
 
         {/* --- DYNAMIC USER DISCOVERY LIST --- */}
         {/* The styles object handles structural zero scrollbar visibility seamlessly */}
-        <div 
+        <div
           className="flex-1 overflow-y-auto space-y-2 pr-1"
           style={{
-            msOverflowStyle: "none",  /* IE and Edge */
-            scrollbarWidth: "none",   /* Firefox */
-            WebkitOverflowScrolling: "touch"
+            msOverflowStyle: "none" /* IE and Edge */,
+            scrollbarWidth: "none" /* Firefox */,
+            WebkitOverflowScrolling: "touch",
           }}
         >
           {/* Custom element injection script targeting standard Webkit runtimes */}
@@ -112,10 +138,18 @@ const Search = () => {
             }
           `}</style>
 
-          {isSearching ? <p className="sidebar-empty" role="status">Searching...</p> : searchError ? <p role="alert" className="sidebar-empty">{searchError}</p> : users.length > 0 ? (
+          {isSearching ? (
+            <p className="sidebar-empty" role="status">
+              Searching...
+            </p>
+          ) : searchError ? (
+            <p role="alert" className="sidebar-empty">
+              {searchError}
+            </p>
+          ) : users.length > 0 ? (
             users.map((i) => (
-              <div 
-                key={i._id} 
+              <div
+                key={i._id}
                 className="p-1 rounded-2xl bg-white/40 border border-white/50 hover:bg-white/90 shadow-sm transition-all duration-150"
               >
                 <UserItem

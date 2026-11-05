@@ -20,9 +20,7 @@ const MessageComponent = ({ message, user }) => {
     >
       {/* Sender Header Label */}
       {!sameSender && (
-        <span className="message-sender">
-          {sender?.name || "Unknown"}
-        </span>
+        <span className="message-sender">{sender?.name || "Unknown"}</span>
       )}
 
       {/* Message Text Context */}
@@ -56,10 +54,7 @@ const MessageComponent = ({ message, user }) => {
       )}
 
       {/* Timestamp */}
-      <span
-        className="message-time"
-        title={moment(createdAt).format("LLL")}
-      >
+      <span className="message-time" title={moment(createdAt).format("LLL")}>
         {timeAgo}
       </span>
     </motion.div>

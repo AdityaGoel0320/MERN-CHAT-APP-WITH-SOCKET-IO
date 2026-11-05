@@ -63,8 +63,7 @@
 
 // export default UserProfile;
 
-
-import React from 'react';
+import React from "react";
 import { useSelector } from "react-redux";
 import moment from "moment";
 import { transformImage } from "../../lib/features";
@@ -73,23 +72,55 @@ import { Avatar } from "@mui/material";
 import { AtSign, CalendarDays, Shield, UserRound } from "lucide-react";
 import AppLayout from "../layout/AppLayout";
 
-
 const UserProfile = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
     <section className="profile-page">
-      <p className="eyebrow">ACCOUNT</p><h1>My profile</h1>
-      <div className="profile-identity"><Avatar src={user.avatar?.url ? transformImage(user.avatar.url) : undefined} alt={user.name} sx={{ width: 88, height: 88 }}>{user.name?.[0]}</Avatar><div><h2>{user.name}</h2><p>@{user.username}</p></div></div>
+      <p className="eyebrow">ACCOUNT</p>
+      <h1>My profile</h1>
+      <div className="profile-identity">
+        <Avatar
+          src={user.avatar?.url ? transformImage(user.avatar.url) : undefined}
+          alt={user.name}
+          sx={{ width: 88, height: 88 }}
+        >
+          {user.name?.[0]}
+        </Avatar>
+        <div>
+          <h2>{user.name}</h2>
+          <p>@{user.username}</p>
+        </div>
+      </div>
       <dl className="profile-details">
-        <div><dt><UserRound size={18} />Full name</dt><dd>{user.name}</dd></div>
-        <div><dt><AtSign size={18} />Username</dt><dd>{user.username}</dd></div>
-        <div><dt><CalendarDays size={18} />Joined</dt><dd>{moment(user.createdAt).format("MMMM D, YYYY")}</dd></div>
-        <div><dt>Bio</dt><dd>{user.bio || "No bio yet"}</dd></div>
+        <div>
+          <dt>
+            <UserRound size={18} />
+            Full name
+          </dt>
+          <dd>{user.name}</dd>
+        </div>
+        <div>
+          <dt>
+            <AtSign size={18} />
+            Username
+          </dt>
+          <dd>{user.username}</dd>
+        </div>
+        <div>
+          <dt>
+            <CalendarDays size={18} />
+            Joined
+          </dt>
+          <dd>{moment(user.createdAt).format("MMMM D, YYYY")}</dd>
+        </div>
+        <div>
+          <dt>Bio</dt>
+          <dd>{user.bio || "No bio yet"}</dd>
+        </div>
       </dl>
       {/* <NavLink to="/admin" className="admin-link"><Shield size={17} />Admin workspace</NavLink> */}
     </section>
-
   );
 };
 

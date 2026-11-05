@@ -19,8 +19,14 @@ import { Message } from "../models/message.js";
 const newGroupChat = TryCatch(async (req, res, next) => {
   const { name, members } = req.body;
 
-  const allMembers = [...new Set([...members.map((member) => member.toString()), req.user.toString()])];
-  if (allMembers.length < 3) return next(new ErrorHandler("Select at least two other members", 400));
+  const allMembers = [
+    ...new Set([
+      ...members.map((member) => member.toString()),
+      req.user.toString(),
+    ]),
+  ];
+  if (allMembers.length < 3)
+    return next(new ErrorHandler("Select at least two other members", 400));
 
   const chat = await Chat.create({
     name,
@@ -29,7 +35,10 @@ const newGroupChat = TryCatch(async (req, res, next) => {
     members: allMembers,
   });
 
-  emitEvent(req, ALERT, allMembers, { chatId: chat._id, message: `Welcome to ${name} group` });
+  emitEvent(req, ALERT, allMembers, {
+    chatId: chat._id,
+    message: `Welcome to ${name} group`,
+  });
   emitEvent(req, REFETCH_CHATS, members);
 
   return res.status(201).json({
@@ -105,11 +114,21 @@ const addMembers = TryCatch(async (req, res, next) => {
   const allNewMembersPromise = members.map((i) => User.findById(i, "name"));
 
   const allNewMembers = await Promise.all(allNewMembersPromise);
-  if (allNewMembers.some((member) => !member)) return next(new ErrorHandler("One or more users no longer exist", 404));
+  if (allNewMembers.some((member) => !member))
+    return next(new ErrorHandler("One or more users no longer exist", 404));
 
-  const uniqueMembers = [...new Set(allNewMembers
-    .filter((member) => !chat.members.some((existing) => existing.toString() === member._id.toString()))
-    .map((member) => member._id.toString()))];
+  const uniqueMembers = [
+    ...new Set(
+      allNewMembers
+        .filter(
+          (member) =>
+            !chat.members.some(
+              (existing) => existing.toString() === member._id.toString()
+            )
+        )
+        .map((member) => member._id.toString())
+    ),
+  ];
 
   chat.members.push(...uniqueMembers);
 
@@ -120,12 +139,10 @@ const addMembers = TryCatch(async (req, res, next) => {
 
   const allUsersName = allNewMembers.map((i) => i.name).join(", ");
 
-  emitEvent(
-    req,
-    ALERT,
-    chat.members,
-    { chatId, message: `${allUsersName} has been added in the group` }
-  );
+  emitEvent(req, ALERT, chat.members, {
+    chatId,
+    message: `${allUsersName} has been added in the group`,
+  });
 
   emitEvent(req, REFETCH_CHATS, chat.members);
 
@@ -144,8 +161,13 @@ const removeMember = TryCatch(async (req, res, next) => {
   ]);
 
   if (!chat) return next(new ErrorHandler("Chat not found", 404));
-  if (!userThatWillBeRemoved || !chat.members.some((member) => member.toString() === userId.toString())) return next(new ErrorHandler("Member not found", 404));
-  if (userId.toString() === chat.creator.toString()) return next(new ErrorHandler("The group owner cannot be removed", 400));
+  if (
+    !userThatWillBeRemoved ||
+    !chat.members.some((member) => member.toString() === userId.toString())
+  )
+    return next(new ErrorHandler("Member not found", 404));
+  if (userId.toString() === chat.creator.toString())
+    return next(new ErrorHandler("The group owner cannot be removed", 400));
 
   if (!chat.groupChat)
     return next(new ErrorHandler("This is not a group chat", 400));
@@ -183,7 +205,8 @@ const leaveGroup = TryCatch(async (req, res, next) => {
   const chat = await Chat.findById(chatId);
 
   if (!chat) return next(new ErrorHandler("Chat not found", 404));
-  if (!chat.members.some((member) => member.toString() === req.user.toString())) return next(new ErrorHandler("You are not a member of this chat", 403));
+  if (!chat.members.some((member) => member.toString() === req.user.toString()))
+    return next(new ErrorHandler("You are not a member of this chat", 403));
 
   if (!chat.groupChat)
     return next(new ErrorHandler("This is not a group chat", 400));
@@ -236,7 +259,8 @@ const sendAttachments = TryCatch(async (req, res, next) => {
   ]);
 
   if (!chat) return next(new ErrorHandler("Chat not found", 404));
-  if (!chat.members.some((member) => member.toString() === req.user.toString())) return next(new ErrorHandler("You are not a member of this chat", 403));
+  if (!chat.members.some((member) => member.toString() === req.user.toString()))
+    return next(new ErrorHandler("You are not a member of this chat", 403));
 
   if (files.length < 1)
     return next(new ErrorHandler("Please provide attachments", 400));
@@ -283,7 +307,12 @@ const getChatDetails = TryCatch(async (req, res, next) => {
       .lean();
 
     if (!chat) return next(new ErrorHandler("Chat not found", 404));
-    if (!chat.members.some((member) => member._id.toString() === req.user.toString())) return next(new ErrorHandler("You are not a member of this chat", 403));
+    if (
+      !chat.members.some(
+        (member) => member._id.toString() === req.user.toString()
+      )
+    )
+      return next(new ErrorHandler("You are not a member of this chat", 403));
 
     chat.members = chat.members.map(({ _id, name, avatar }) => ({
       _id,
@@ -298,7 +327,10 @@ const getChatDetails = TryCatch(async (req, res, next) => {
   } else {
     const chat = await Chat.findById(req.params.id);
     if (!chat) return next(new ErrorHandler("Chat not found", 404));
-    if (!chat.members.some((member) => member.toString() === req.user.toString())) return next(new ErrorHandler("You are not a member of this chat", 403));
+    if (
+      !chat.members.some((member) => member.toString() === req.user.toString())
+    )
+      return next(new ErrorHandler("You are not a member of this chat", 403));
 
     return res.status(200).json({
       success: true,

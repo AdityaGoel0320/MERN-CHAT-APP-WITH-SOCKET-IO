@@ -20,14 +20,33 @@ const ChatList = ({
 }) => {
   const [query, setQuery] = useState("");
   const dispatch = useDispatch();
-  const filteredChats = chats.filter((chat) => chat.name?.toLowerCase().includes(query.toLowerCase()));
+  const filteredChats = chats.filter((chat) =>
+    chat.name?.toLowerCase().includes(query.toLowerCase())
+  );
   return (
-    <div
-      style={{ width: w }}
-      className="conversation-list"
-    >
-      <div className="sidebar-heading"><h2>Messages <span>{chats.length}</span></h2><button className="icon-button" aria-label="Start a conversation" title="Start a conversation" onClick={() => dispatch(setIsSearch(true))}><MessageSquarePlus size={19} /></button></div>
-      <label className="conversation-search"><Search size={17} /><input aria-label="Search conversations" placeholder="Search conversations" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+    <div style={{ width: w }} className="conversation-list">
+      <div className="sidebar-heading">
+        <h2>
+          Messages <span>{chats.length}</span>
+        </h2>
+        <button
+          className="icon-button"
+          aria-label="Start a conversation"
+          title="Start a conversation"
+          onClick={() => dispatch(setIsSearch(true))}
+        >
+          <MessageSquarePlus size={19} />
+        </button>
+      </div>
+      <label className="conversation-search">
+        <Search size={17} />
+        <input
+          aria-label="Search conversations"
+          placeholder="Search conversations"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </label>
       <p className="sidebar-label">ALL CONVERSATIONS</p>
       {filteredChats.length > 0 ? (
         filteredChats.map((data) => {
@@ -42,10 +61,7 @@ const ChatList = ({
           );
 
           return (
-            <div 
-              key={_id} 
-              className="w-full"
-            >
+            <div key={_id} className="w-full">
               <ChatItem
                 onSelect={onSelect}
                 newMessageAlert={newMessageAlert}
@@ -64,7 +80,14 @@ const ChatList = ({
         <div className="sidebar-empty">
           <MessagesSquare size={28} />
           <p>{query ? "No matching conversations" : "No conversations yet"}</p>
-          {!query && <button className="text-action" onClick={() => dispatch(setIsSearch(true))}>Find people</button>}
+          {!query && (
+            <button
+              className="text-action"
+              onClick={() => dispatch(setIsSearch(true))}
+            >
+              Find people
+            </button>
+          )}
         </div>
       )}
     </div>

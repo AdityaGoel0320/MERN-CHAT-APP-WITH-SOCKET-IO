@@ -7,7 +7,6 @@ import React from "react";
 const LayoutLoader = () => {
   return (
     <div className="w-full h-[calc(100vh-4.5rem)] max-w-[90rem] mx-auto grid grid-cols-12 gap-4 p-4 overflow-hidden select-none">
-      
       {/* Left Column Sidebar Skeleton (Desktop only) */}
       <div className="hidden sm:block sm:col-span-4 md:col-span-3 h-full space-y-3 p-3 rounded-2xl bg-white/30 backdrop-blur-md border border-white/40">
         <LocalCircleSkeletonItem />
@@ -20,9 +19,14 @@ const LayoutLoader = () => {
       {/* Main Feed Activity Column Skeleton */}
       <div className="col-span-12 sm:col-span-8 md:col-span-6 h-full flex flex-col gap-4 p-4 rounded-3xl bg-white/50 backdrop-blur-xl border border-white/60 overflow-y-auto no-scrollbar">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className={`flex gap-3 w-full max-w-md ${i % 2 === 0 ? 'self-start' : 'self-end flex-row-reverse'}`}>
+          <div
+            key={i}
+            className={`flex gap-3 w-full max-w-md ${i % 2 === 0 ? "self-start" : "self-end flex-row-reverse"}`}
+          >
             <div className="w-10 h-10 rounded-full bg-slate-200 animate-pulse shrink-0" />
-            <div className={`h-12 w-64 rounded-2xl bg-slate-200/80 animate-pulse ${i % 2 === 0 ? 'rounded-tl-none' : 'rounded-tr-none'}`} />
+            <div
+              className={`h-12 w-64 rounded-2xl bg-slate-200/80 animate-pulse ${i % 2 === 0 ? "rounded-tl-none" : "rounded-tr-none"}`}
+            />
           </div>
         ))}
       </div>
@@ -58,10 +62,19 @@ const TypingLoader = () => {
           animation: customBounce 0.8s ease-in-out infinite;
         }
       `}</style>
-      
-      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-dot" style={{ animationDelay: "0.1s" }} />
-      <span className="w-2 h-2 rounded-full bg-indigo-400 animate-dot" style={{ animationDelay: "0.25s" }} />
-      <span className="w-2 h-2 rounded-full bg-indigo-500 animate-dot" style={{ animationDelay: "0.4s" }} />
+
+      <span
+        className="w-2 h-2 rounded-full bg-indigo-500 animate-dot"
+        style={{ animationDelay: "0.1s" }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-indigo-400 animate-dot"
+        style={{ animationDelay: "0.25s" }}
+      />
+      <span
+        className="w-2 h-2 rounded-full bg-indigo-500 animate-dot"
+        style={{ animationDelay: "0.4s" }}
+      />
     </div>
   );
 };

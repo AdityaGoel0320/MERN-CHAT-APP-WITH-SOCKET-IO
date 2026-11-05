@@ -6,7 +6,17 @@ import AvatarCard from "../components/shared/AvatarCard";
 import UserItem from "../components/shared/UserItem";
 import { LayoutLoader } from "../components/layout/Loaders";
 import { setIsAddMember } from "../redux/reducers/misc";
-import { ArrowLeft, Check, LoaderCircle, Menu, Pencil, Trash2, UserPlus, Users, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  LoaderCircle,
+  Menu,
+  Pencil,
+  Trash2,
+  UserPlus,
+  Users,
+  X,
+} from "lucide-react";
 import { Drawer, IconButton } from "@mui/material";
 import Navbar2 from "../components/layout/Navbar2";
 import {
@@ -17,8 +27,12 @@ import {
   useRenameGroupMutation,
 } from "../redux/api/api";
 
-const ConfirmDeleteDialog = lazy(() => import("../components/dialogs/ConfirmDeleteDialog"));
-const AddMemberDialog = lazy(() => import("../components/dialogs/AddMemberDialog"));
+const ConfirmDeleteDialog = lazy(
+  () => import("../components/dialogs/ConfirmDeleteDialog")
+);
+const AddMemberDialog = lazy(
+  () => import("../components/dialogs/AddMemberDialog")
+);
 
 const Groups = () => {
   const chatId = useSearchParams()[0].get("group");
@@ -28,11 +42,20 @@ const Groups = () => {
   const { isAddMember } = useSelector((state) => state.misc);
 
   const myGroups = useMyGroupsQuery("");
-  const groupDetails = useChatDetailsQuery({ chatId, populate: true }, { skip: !chatId });
+  const groupDetails = useChatDetailsQuery(
+    { chatId, populate: true },
+    { skip: !chatId }
+  );
 
-  const [updateGroup, isLoadingGroupName] = useAsyncMutation(useRenameGroupMutation);
-  const [removeMember, isLoadingRemoveMember] = useAsyncMutation(useRemoveGroupMemberMutation);
-  const [deleteGroup, isLoadingDeleteGroup] = useAsyncMutation(useDeleteChatMutation);
+  const [updateGroup, isLoadingGroupName] = useAsyncMutation(
+    useRenameGroupMutation
+  );
+  const [removeMember, isLoadingRemoveMember] = useAsyncMutation(
+    useRemoveGroupMemberMutation
+  );
+  const [deleteGroup, isLoadingDeleteGroup] = useAsyncMutation(
+    useDeleteChatMutation
+  );
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -71,7 +94,10 @@ const Groups = () => {
 
   const updateGroupName = async () => {
     if (!groupNameUpdatedValue.trim()) return;
-    const result = await updateGroup("Updating Group Name...", { chatId, name: groupNameUpdatedValue.trim() });
+    const result = await updateGroup("Updating Group Name...", {
+      chatId,
+      name: groupNameUpdatedValue.trim(),
+    });
     if (result) setIsEdit(false);
   };
 
@@ -147,9 +173,7 @@ const Groups = () => {
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          <h1>
-            {groupName}
-          </h1>
+          <h1>{groupName}</h1>
           <button
             disabled={isLoadingGroupName}
             aria-label="Rename group"
@@ -187,82 +211,112 @@ const Groups = () => {
     <div className="app-shell">
       <Navbar2 onOpenConversations={handleMobile} />
       <div className="group-workspace">
-      <style>{`
+        <style>{`
         .no-scrollbar::-webkit-scrollbar { display: none !important; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      {/* Ambient background decoration */}
+        {/* Ambient background decoration */}
 
-      {/* Desktop Sidebar Column */}
-      <aside className="chat-sidebar">
-        <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
-      </aside>
+        {/* Desktop Sidebar Column */}
+        <aside className="chat-sidebar">
+          <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
+        </aside>
 
-      {/* Primary Context Arena Grid */}
-      <main className="group-main group-panel">
-        <div className="flex items-center justify-between w-full">{IconBtns}<span className="eyebrow">GROUP SETTINGS</span></div>
+        {/* Primary Context Arena Grid */}
+        <main className="group-main group-panel">
+          <div className="flex items-center justify-between w-full">
+            {IconBtns}
+            <span className="eyebrow">GROUP SETTINGS</span>
+          </div>
 
-        {chatId ? (
-          <div className="w-full flex flex-col items-center">
-            {groupDetails.isLoading ? <LoaderCircle className="animate-spin" size={24} /> : <>
-            {GroupNameHeader}
+          {chatId ? (
+            <div className="w-full flex flex-col items-center">
+              {groupDetails.isLoading ? (
+                <LoaderCircle className="animate-spin" size={24} />
+              ) : (
+                <>
+                  {GroupNameHeader}
 
-            {/* Inner Workspace Glass Area */}
-            <section className="group-members">
-              <div className="mb-4">
-                <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
-                  Members ({members.length})
-                </h2>
-              </div>
-
-              {/* Secure Scroll Area */}
-              <div className="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar">
-                {isLoadingRemoveMember ? (
-                  <div className="flex justify-center items-center h-full py-10">
-                    <LoaderCircle size={24} className="animate-spin" />
-                  </div>
-                ) : (
-                  members.map((i) => (
-                    <div key={i._id} className="member-row">
-                      <UserItem user={i} isAdded handler={removeMemberHandler} />
+                  {/* Inner Workspace Glass Area */}
+                  <section className="group-members">
+                    <div className="mb-4">
+                      <h2 className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                        Members ({members.length})
+                      </h2>
                     </div>
-                  ))
-                )}
-              </div>
-            </section>
 
-            {ButtonGroup}
-            </>}
-          </div>
-        ) : (
-          <div className="sidebar-empty my-auto">
-            <Users size={40} />
-            <h1>Groups</h1>
-            <p>No group selected</p>
-          </div>
+                    {/* Secure Scroll Area */}
+                    <div className="flex-1 overflow-y-auto space-y-2 pr-1 no-scrollbar">
+                      {isLoadingRemoveMember ? (
+                        <div className="flex justify-center items-center h-full py-10">
+                          <LoaderCircle size={24} className="animate-spin" />
+                        </div>
+                      ) : (
+                        members.map((i) => (
+                          <div key={i._id} className="member-row">
+                            <UserItem
+                              user={i}
+                              isAdded
+                              handler={removeMemberHandler}
+                            />
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </section>
+
+                  {ButtonGroup}
+                </>
+              )}
+            </div>
+          ) : (
+            <div className="sidebar-empty my-auto">
+              <Users size={40} />
+              <h1>Groups</h1>
+              <p>No group selected</p>
+            </div>
+          )}
+        </main>
+
+        {/* Dialog Suspense Portals */}
+        {isAddMember && (
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50" />
+            }
+          >
+            <AddMemberDialog chatId={chatId} />
+          </Suspense>
         )}
-      </main>
 
-      {/* Dialog Suspense Portals */}
-      {isAddMember && (
-        <Suspense fallback={<div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50" />}>
-          <AddMemberDialog chatId={chatId} />
-        </Suspense>
-      )}
+        {confirmDeleteDialog && (
+          <Suspense
+            fallback={
+              <div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50" />
+            }
+          >
+            <ConfirmDeleteDialog
+              open={confirmDeleteDialog}
+              handleClose={closeConfirmDeleteHandler}
+              deleteHandler={deleteHandler}
+            />
+          </Suspense>
+        )}
 
-      {confirmDeleteDialog && (
-        <Suspense fallback={<div className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50" />}>
-          <ConfirmDeleteDialog
-            open={confirmDeleteDialog}
-            handleClose={closeConfirmDeleteHandler}
-            deleteHandler={deleteHandler}
-          />
-        </Suspense>
-      )}
-
-      {/* Responsive Mobile Drawer Navigation Overlay */}
-      <Drawer open={isMobileMenuOpen} onClose={handleMobileClose} PaperProps={{ sx: { width: "min(340px, 88vw)" } }}><div className="flex justify-end p-2"><IconButton aria-label="Close groups" onClick={handleMobileClose}><X size={20} /></IconButton></div><GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} /></Drawer>
+        {/* Responsive Mobile Drawer Navigation Overlay */}
+        <Drawer
+          open={isMobileMenuOpen}
+          onClose={handleMobileClose}
+          PaperProps={{ sx: { width: "min(340px, 88vw)" } }}
+        >
+          <div className="flex justify-end p-2">
+            <IconButton aria-label="Close groups" onClick={handleMobileClose}>
+              <X size={20} />
+            </IconButton>
+          </div>
+          <GroupsList myGroups={myGroups?.data?.groups} chatId={chatId} />
+        </Drawer>
       </div>
     </div>
   );
@@ -299,13 +353,9 @@ const GroupListItem = memo(function GroupListItem({ group, chatId }) {
       onClick={(e) => isActive && e.preventDefault()}
       className={`group-list-link ${isActive ? "is-active" : ""}`}
     >
-      <div
-        className="flex items-center gap-3 p-3"
-      >
+      <div className="flex items-center gap-3 p-3">
         <AvatarCard avatar={avatar} />
-        <div className="font-semibold text-sm truncate">
-          {name}
-        </div>
+        <div className="font-semibold text-sm truncate">{name}</div>
       </div>
     </Link>
   );

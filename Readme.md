@@ -40,16 +40,16 @@ Express and Socket.IO share the same HTTP server. REST endpoints handle authenti
 
 ## Tech Stack
 
-| Layer | Technologies |
-| --- | --- |
-| Client | React 18, Vite 5, React Router 6 |
-| State and data | Redux Toolkit, RTK Query, Axios |
-| Interface | Material UI, Tailwind CSS, Framer Motion, Lucide |
-| Server | Node.js, Express 4, Socket.IO 4 |
-| Persistence | MongoDB, Mongoose 8 |
-| Authentication | JSON Web Tokens, bcrypt, HTTP-only cookies |
-| Media | Multer, Cloudinary, react-easy-crop |
-| Validation and tests | express-validator, Node.js test runner |
+| Layer                | Technologies                                     |
+| -------------------- | ------------------------------------------------ |
+| Client               | React 18, Vite 5, React Router 6                 |
+| State and data       | Redux Toolkit, RTK Query, Axios                  |
+| Interface            | Material UI, Tailwind CSS, Framer Motion, Lucide |
+| Server               | Node.js, Express 4, Socket.IO 4                  |
+| Persistence          | MongoDB, Mongoose 8                              |
+| Authentication       | JSON Web Tokens, bcrypt, HTTP-only cookies       |
+| Media                | Multer, Cloudinary, react-easy-crop              |
+| Validation and tests | express-validator, Node.js test runner           |
 
 ## Project Structure
 
@@ -88,9 +88,22 @@ Run from the repository root:
 ```bash
 git clone https://github.com/AdityaGoel0320/MERN-CHAT-APP-WITH-SOCKET-IO.git
 cd MERN-CHAT-APP-WITH-SOCKET-IO
+npm install
 npm --prefix backend install
 npm --prefix frontend install
 ```
+
+### Automatic Formatting
+
+The root `npm install` activates the Husky pre-commit hook. Every commit runs
+Prettier across the repository, then lint-staged formats and re-stages only the
+files already selected for the commit. Unstaged work stays unstaged, including
+formatting changes to files outside the commit. Formatting failures block the
+commit.
+
+Run `npm run format` to format manually or `npm run format:check` to check without
+changing files. Dependencies, build output, lockfiles, and environment files are
+excluded.
 
 ### 2. Configure the Backend
 
@@ -155,15 +168,15 @@ Create two accounts in separate browser profiles, send a friend request from one
 
 ## Deployment
 
-| Setting | Frontend | Backend |
-| --- | --- | --- |
-| Platform | Vercel | Render web service |
-| Root directory | `frontend` | `backend` |
-| Install command | `npm install` | `npm install` |
-| Build command | `npm run build` | Not required |
-| Output directory | `dist` | Not applicable |
-| Start command | Managed by Vercel | `npm start` |
-| Public URL | `https://your-chatbuddy.vercel.app` | `https://chatbuddy-ywot.onrender.com` |
+| Setting          | Frontend                            | Backend                               |
+| ---------------- | ----------------------------------- | ------------------------------------- |
+| Platform         | Vercel                              | Render web service                    |
+| Root directory   | `frontend`                          | `backend`                             |
+| Install command  | `npm install`                       | `npm install`                         |
+| Build command    | `npm run build`                     | Not required                          |
+| Output directory | `dist`                              | Not applicable                        |
+| Start command    | Managed by Vercel                   | `npm start`                           |
+| Public URL       | `https://your-chatbuddy.vercel.app` | `https://chatbuddy-ywot.onrender.com` |
 
 Before deploying:
 
@@ -181,24 +194,24 @@ The Vercel frontend and Render backend are separate sites. Requests must include
 
 Run these commands from the repository root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm --prefix backend test` | Run isolated socket-handler tests using in-memory dependencies |
-| `npm --prefix frontend run build` | Compile the production frontend |
-| `npm --prefix frontend run lint` | Run the frontend ESLint checks |
+| Command                           | Purpose                                                        |
+| --------------------------------- | -------------------------------------------------------------- |
+| `npm --prefix backend test`       | Run isolated socket-handler tests using in-memory dependencies |
+| `npm --prefix frontend run build` | Compile the production frontend                                |
+| `npm --prefix frontend run lint`  | Run the frontend ESLint checks                                 |
 
 Socket tests do not require MongoDB or Cloudinary. Full signup, cross-account messaging, uploads, and deployed-cookie verification require configured services and browser testing. A successful build does not imply a clean lint report; the frontend has existing prop-validation and unused-import lint issues.
 
 ## Operational Notes
 
-| Symptom | Check |
-| --- | --- |
-| Slow first connection | The free-tier Render service may be waking up. Allow time for the initial request. |
-| `EADDRINUSE` | Another process already owns the backend port. Stop the duplicate instance rather than launching more servers. |
+| Symptom                                            | Check                                                                                                                                            |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Slow first connection                              | The free-tier Render service may be waking up. Allow time for the initial request.                                                               |
+| `EADDRINUSE`                                       | Another process already owns the backend port. Stop the duplicate instance rather than launching more servers.                                   |
 | Login succeeds but protected requests return `401` | Check cookie storage, the exact allowed frontend origin, HTTPS settings, and whether both deployments include the latest authentication changes. |
-| CORS errors during local development | Set `frontendUrl` to the actual local frontend origin, not the deployed Vercel URL. |
-| MongoDB connection failure | Check `MONGO_URI`, Atlas network access, and DNS connectivity. Start the backend from its own directory so its `.env` file loads. |
-| Missing media or failed uploads | Check Cloudinary configuration and upload restrictions. |
+| CORS errors during local development               | Set `frontendUrl` to the actual local frontend origin, not the deployed Vercel URL.                                                              |
+| MongoDB connection failure                         | Check `MONGO_URI`, Atlas network access, and DNS connectivity. Start the backend from its own directory so its `.env` file loads.                |
+| Missing media or failed uploads                    | Check Cloudinary configuration and upload restrictions.                                                                                          |
 
 ### Current Boundaries
 

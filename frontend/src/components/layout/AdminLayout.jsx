@@ -91,7 +91,14 @@ const Sidebar = ({ w = "100%" }) => {
           </Link>
         ))}
 
-        <Button onClick={logoutHandler} sx={{ justifyContent: "flex-start", p: "12px 16px", color: "error.main" }}>
+        <Button
+          onClick={logoutHandler}
+          sx={{
+            justifyContent: "flex-start",
+            p: "12px 16px",
+            color: "error.main",
+          }}
+        >
           <Stack direction={"row"} alignItems={"center"} spacing={"1rem"}>
             <ExitToAppIcon />
 
@@ -116,19 +123,44 @@ const AdminLayout = ({ children }) => {
 
   return (
     <div className="app-shell">
-      <header className="app-header"><LinkComponent to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</LinkComponent><div className="header-actions"><ThemeToggle /><IconButton aria-label="Open admin navigation" onClick={handleMobile} sx={{ display: { md: "none" } }}><MenuIcon /></IconButton></div></header>
+      <header className="app-header">
+        <LinkComponent to="/" className="brand">
+          <span className="brand-mark">
+            <MessageCircle size={22} />
+          </span>
+          ChatBuddy
+        </LinkComponent>
+        <div className="header-actions">
+          <ThemeToggle />
+          <IconButton
+            aria-label="Open admin navigation"
+            onClick={handleMobile}
+            sx={{ display: { md: "none" } }}
+          >
+            <MenuIcon />
+          </IconButton>
+        </div>
+      </header>
       <div className="admin-workspace">
-      <aside className="admin-sidebar">
-        <Sidebar />
-      </aside>
-      <main className="admin-main">
-        {children}
-      </main>
+        <aside className="admin-sidebar">
+          <Sidebar />
+        </aside>
+        <main className="admin-main">{children}</main>
 
-      <Drawer open={isMobile} onClose={handleClose} PaperProps={{ sx: { width: "min(300px, 88vw)" } }}>
-        <IconButton aria-label="Close admin navigation" onClick={handleClose} sx={{ alignSelf: "flex-end", m: 1 }}><CloseIcon /></IconButton>
-        <Sidebar />
-      </Drawer>
+        <Drawer
+          open={isMobile}
+          onClose={handleClose}
+          PaperProps={{ sx: { width: "min(300px, 88vw)" } }}
+        >
+          <IconButton
+            aria-label="Close admin navigation"
+            onClick={handleClose}
+            sx={{ alignSelf: "flex-end", m: 1 }}
+          >
+            <CloseIcon />
+          </IconButton>
+          <Sidebar />
+        </Drawer>
       </div>
     </div>
   );

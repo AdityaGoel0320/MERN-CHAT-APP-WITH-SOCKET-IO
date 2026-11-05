@@ -73,7 +73,12 @@ const columns = [
 ];
 
 const ChatManagement = () => {
-  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/chats`, key: "dashboard-chats", credentials: "include", dependencyProps: [] });
+  const { loading, data, error } = useFetchData({
+    url: `${server}/api/v1/admin/chats`,
+    key: "dashboard-chats",
+    credentials: "include",
+    dependencyProps: [],
+  });
 
   useErrors([
     {
@@ -104,7 +109,7 @@ const ChatManagement = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <ChatSkeleton/>
+        <ChatSkeleton />
       ) : (
         <Table heading={"All Chats"} columns={columns} rows={rows} />
       )}

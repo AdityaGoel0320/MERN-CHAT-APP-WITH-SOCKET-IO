@@ -29,8 +29,10 @@ const FileMenu = ({ chatId, anchorEl }) => {
     e.target.value = "";
 
     if (files.length <= 0) return;
-    if (files.length > 5) return toast.error(`You can only send 5 ${key} at a time`);
-    if (files.some((file) => file.size > 5 * 1024 * 1024)) return toast.error("Each attachment must be 5 MB or smaller");
+    if (files.length > 5)
+      return toast.error(`You can only send 5 ${key} at a time`);
+    if (files.some((file) => file.size > 5 * 1024 * 1024))
+      return toast.error("Each attachment must be 5 MB or smaller");
 
     dispatch(setUploadingLoader(true));
     const toastId = toast.loading(`Sending ${key}...`);
@@ -59,7 +61,14 @@ const FileMenu = ({ chatId, anchorEl }) => {
 
   return (
     <>
-      <Menu anchorEl={anchorEl} open={isFileMenu} onClose={closeFileMenu} anchorOrigin={{ vertical: "top", horizontal: "left" }} transformOrigin={{ vertical: "bottom", horizontal: "left" }} MenuListProps={{ "aria-label": "Attachments" }}>
+      <Menu
+        anchorEl={anchorEl}
+        open={isFileMenu}
+        onClose={closeFileMenu}
+        anchorOrigin={{ vertical: "top", horizontal: "left" }}
+        transformOrigin={{ vertical: "bottom", horizontal: "left" }}
+        MenuListProps={{ "aria-label": "Attachments" }}
+      >
         <MenuOptionItem
           Icon={Image}
           label="Image"
@@ -126,11 +135,9 @@ const FileMenu = ({ chatId, anchorEl }) => {
 
 /* --- SUB-COMPONENT: INTERACTIVE MENU ROW OPTION --- */
 const MenuOptionItem = ({ Icon, label, onClick }) => (
-  <MenuItem
-    onClick={onClick}
-    sx={{ gap: 1.5, fontSize: 14, minWidth: 170 }}
-  >
-    <Icon size={18} />{label}
+  <MenuItem onClick={onClick} sx={{ gap: 1.5, fontSize: 14, minWidth: 170 }}>
+    <Icon size={18} />
+    {label}
   </MenuItem>
 );
 

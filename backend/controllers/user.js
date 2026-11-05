@@ -23,7 +23,12 @@ const newUser = TryCatch(async (req, res, next) => {
 
   const usernameExists = await User.exists({ username });
   if (usernameExists)
-    return next(new ErrorHandler("Username is already taken. Please choose another one.", 409));
+    return next(
+      new ErrorHandler(
+        "Username is already taken. Please choose another one.",
+        409
+      )
+    );
 
   const result = await uploadFilesToCloudinary([file]);
 

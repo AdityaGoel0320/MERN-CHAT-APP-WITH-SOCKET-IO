@@ -54,7 +54,7 @@ const AddMemberDialog = ({ chatId }) => {
 
         <Stack spacing={"1rem"}>
           {isLoading ? (
-            <ChatSkeleton/>
+            <ChatSkeleton />
           ) : data?.friends?.length > 0 ? (
             data?.friends?.map((i) => (
               <UserItem

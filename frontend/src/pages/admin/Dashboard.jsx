@@ -4,12 +4,7 @@ import {
   Message as MessageIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
-import {
-  Container,
-  Paper,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Container, Paper, Stack, Typography } from "@mui/material";
 import moment from "moment";
 import React from "react";
 import AdminLayout from "../../components/layout/AdminLayout";
@@ -19,7 +14,12 @@ import { useErrors } from "../../hooks/hook";
 import ChatSkeleton from "../../components/shared/ChatSkeleton";
 
 const Dashboard = () => {
-  const { loading, data, error } = useFetchData({ url: `${server}/api/v1/admin/stats`, key: "dashboard-stats", credentials: "include", dependencyProps: [] });
+  const { loading, data, error } = useFetchData({
+    url: `${server}/api/v1/admin/stats`,
+    key: "dashboard-stats",
+    credentials: "include",
+    dependencyProps: [],
+  });
 
   const { stats } = data || {};
 
@@ -31,7 +31,15 @@ const Dashboard = () => {
   ]);
 
   const Appbar = (
-    <header className="admin-section-header"><div><p className="eyebrow">OVERVIEW</p><h1>Workspace overview</h1></div><Typography color="text.secondary" sx={{ fontSize: 12 }}>{moment().format("dddd, D MMMM YYYY")}</Typography></header>
+    <header className="admin-section-header">
+      <div>
+        <p className="eyebrow">OVERVIEW</p>
+        <h1>Workspace overview</h1>
+      </div>
+      <Typography color="text.secondary" sx={{ fontSize: 12 }}>
+        {moment().format("dddd, D MMMM YYYY")}
+      </Typography>
+    </header>
   );
 
   const Widgets = (
@@ -62,7 +70,7 @@ const Dashboard = () => {
   return (
     <AdminLayout>
       {loading ? (
-        <ChatSkeleton/>
+        <ChatSkeleton />
       ) : (
         <Container component={"section"}>
           {Appbar}

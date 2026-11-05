@@ -1,11 +1,5 @@
 import { useInputValidation } from "6pp";
-import {
-  Button,
-  Container,
-  Paper,
-  TextField,
-  Typography
-} from "@mui/material";
+import { Button, Container, Paper, TextField, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Navigate, Link } from "react-router-dom";
@@ -33,7 +27,15 @@ const AdminLogin = () => {
 
   return (
     <div className="auth-page">
-      <header className="auth-header"><Link to="/" className="brand"><span className="brand-mark"><MessageCircle size={22} /></span>ChatBuddy</Link><ThemeToggle /></header>
+      <header className="auth-header">
+        <Link to="/" className="brand">
+          <span className="brand-mark">
+            <MessageCircle size={22} />
+          </span>
+          ChatBuddy
+        </Link>
+        <ThemeToggle />
+      </header>
       <Container
         component={"main"}
         maxWidth="xs"
@@ -55,7 +57,6 @@ const AdminLogin = () => {
         >
           <Typography variant="h5">
             <p className="flex items-center justify-center uppercase font-bold text-3xl ">
-
               Admin workspace
             </p>
           </Typography>
@@ -76,9 +77,7 @@ const AdminLogin = () => {
               value={secretKey.value}
               onChange={secretKey.changeHandler}
               className="flex items-center justify-center uppercase font-bold text-3xl "
-
             />
-
 
             <Button
               sx={{

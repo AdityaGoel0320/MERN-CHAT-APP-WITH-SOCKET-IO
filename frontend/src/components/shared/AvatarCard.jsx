@@ -10,8 +10,12 @@ const AvatarCard = ({ avatar = [], max = 4 }) => {
   return (
     <div className="flex items-center space-x-2">
       {/* Relational layout track with standard dimensions */}
-      <div className="relative h-12 flex items-center select-none" style={{ width: `${visibleAvatars.length * 1.5 + (extraCount > 0 ? 2 : 1.5)}rem` }}>
-        
+      <div
+        className="relative h-12 flex items-center select-none"
+        style={{
+          width: `${visibleAvatars.length * 1.5 + (extraCount > 0 ? 2 : 1.5)}rem`,
+        }}
+      >
         {visibleAvatars.map((src, index) => (
           <img
             key={index}

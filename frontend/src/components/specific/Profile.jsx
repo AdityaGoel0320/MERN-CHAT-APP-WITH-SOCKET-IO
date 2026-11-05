@@ -7,11 +7,11 @@ const Profile = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <div 
+    <div
       className="w-full max-w-md mx-auto flex flex-col items-center p-6 sm:p-8 rounded-[2.5rem] bg-white/60 border border-white/50 backdrop-blur-2xl shadow-[0_20px_50px_rgba(79,70,229,0.06)] overflow-y-auto"
       style={{
         msOverflowStyle: "none",
-        scrollbarWidth: "none"
+        scrollbarWidth: "none",
       }}
     >
       {/* Hide scrollbar handle visibility natively inside sub-layouts */}
@@ -33,24 +33,24 @@ const Profile = () => {
 
       {/* --- PROFILE METRICS STACK --- */}
       <div className="w-full space-y-3.5">
-        <ProfileCard 
-          heading="Bio" 
-          text={user?.bio || "No bio added yet."} 
-          iconClass="fas fa-quote-left" 
+        <ProfileCard
+          heading="Bio"
+          text={user?.bio || "No bio added yet."}
+          iconClass="fas fa-quote-left"
         />
-        
+
         <ProfileCard
           heading="Username"
           text={`@${user?.username}`}
           iconClass="fas fa-at"
         />
-        
-        <ProfileCard 
-          heading="Name" 
-          text={user?.name} 
-          iconClass="fas fa-user-shield" 
+
+        <ProfileCard
+          heading="Name"
+          text={user?.name}
+          iconClass="fas fa-user-shield"
         />
-        
+
         <ProfileCard
           heading="Joined Network"
           text={user?.createdAt ? moment(user.createdAt).fromNow() : "N/A"}
